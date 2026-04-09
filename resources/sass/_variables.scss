@@ -1,7 +1,20 @@
 // Body
 $body-bg: #f8fafc;
 
+// Colors
+$primary: #0d4f2d;
+$success: #15803d;
+$info: #0ea5e9;
+$warning: #f59e0b;
+$danger: #dc2626;
+
 // Typography
-$font-family-sans-serif: 'Nunito', sans-serif;
+$font-family-sans-serif: 'Plus Jakarta Sans', 'Nunito', sans-serif;
 $font-size-base: 0.9rem;
 $line-height-base: 1.6;
+
+// Components
+$border-radius: 0.5rem;
+$border-radius-lg: 0.75rem;
+$border-radius-sm: 0.25rem;
+$box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
