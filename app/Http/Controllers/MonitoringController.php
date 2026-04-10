@@ -58,6 +58,14 @@ class MonitoringController extends Controller
 
     public function store(StoreMonitoringPenagihanRequest $request): RedirectResponse
     {
+        \Illuminate\Support\Facades\Log::info('Monitoring Store Request Received', [
+            'user_id' => auth()->id(),
+            'data_count' => count($request->all()),
+            'has_foto' => $request->hasFile('foto'),
+            'has_sig_mitra' => $request->filled('signature_mitra'),
+            'has_sig_petugas' => $request->filled('signature_petugas'),
+        ]);
+
         $tanggal = $request->date('tanggal');
         $nomorSurat = $this->nomorSuratService->generateNomorSurat($tanggal);
 

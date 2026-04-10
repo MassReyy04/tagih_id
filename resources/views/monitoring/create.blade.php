@@ -7,6 +7,24 @@
     <h1 class="ptpn-page-title h3 mb-2">Input berita acara kunjungan</h1>
     <p class="text-muted mb-4">Lengkapi formulir, ambil lokasi (izinkan akses GPS di perangkat), lalu tanda tangan di kedua kolom.</p>
 
+    @if ($errors->any())
+        <div class="alert alert-danger shadow-sm border-0 mb-4">
+            <div class="d-flex">
+                <div class="me-3">
+                    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                </div>
+                <div>
+                    <h4 class="h6 mb-1 fw-bold">Terjadi kesalahan input:</h4>
+                    <ul class="mb-0 small">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <form action="{{ route('monitoring.store') }}" method="post" enctype="multipart/form-data" id="formBam" class="card ptpn-card">
         @csrf
         <div class="card-body">
