@@ -38,6 +38,18 @@
   z-index: 1;
 }
 
+.ptpn-guest-body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', 'Nunito', system-ui, sans-serif;
+  background: #052e16;
+  overflow-x: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
 .navbar-ptpn {
   background: linear-gradient(90deg, var(--ptpn-green-deep) 0%, var(--ptpn-green) 55%, #166534 100%) !important;
   box-shadow: 0 4px 24px rgba(5, 46, 22, 0.35);
@@ -94,17 +106,18 @@
   letter-spacing: -0.03em;
 }
 
-.ptpn-card {
+.ptpn-card, .ptpn-login-card {
+  background: #fff !important;
   border: none !important;
-  border-radius: $border-radius-lg !important;
-  box-shadow: $box-shadow !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 1rem 3rem rgba(5, 46, 22, 0.12) !important;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   overflow: hidden;
 }
 
 .ptpn-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 0.5rem 2rem rgba(13, 79, 45, 0.14) !important;
+  box-shadow: 0 1.5rem 4rem rgba(13, 79, 45, 0.18) !important;
 }
 
 .ptpn-card-header {
@@ -214,14 +227,6 @@
 }
 
 /* ——— Guest / Login ——— */
-.ptpn-guest-body {
-  min-height: 100vh;
-  margin: 0;
-  font-family: 'Plus Jakarta Sans', 'Nunito', system-ui, sans-serif;
-  background: #052e16;
-  overflow-x: hidden;
-}
-
 .ptpn-login-wrap {
   min-height: 100vh;
 }
@@ -260,13 +265,8 @@
 }
 
 @keyframes ptpn-float {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(12px, -12px) scale(1.05);
-  }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(12px, -12px) scale(1.05); }
 }
 
 .ptpn-login-aside-inner {
@@ -322,47 +322,13 @@
   padding: 2rem 2rem 1.75rem;
   animation: ptpn-in 0.55s ease-out;
   box-sizing: border-box;
-  overflow: hidden; // mencegah demo card "keluar" dari area kartu
 }
 
 @keyframes ptpn-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.ptpn-login-card h2 {
-  font-weight: 700;
-  color: var(--ptpn-green-deep);
-  font-size: 1.35rem;
-}
-
-.ptpn-demo-grid {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  grid-template-columns: 1fr;
-  width: 100%;
-}
-
-.ptpn-demo-card {
-  border-radius: 0.75rem;
-  padding: 0.9rem 1rem;
-  text-align: left;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  position: relative;
-  overflow: hidden;
-  width: 100%; // paksa mengikuti lebar container, agar tidak melebar
-}
-
-/* Versi lebih ringkas untuk Akun Demo */
 .ptpn-demo-choice {
   border-radius: 0.85rem;
   border: 2px solid transparent;
@@ -389,123 +355,4 @@
 .ptpn-demo-choice:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(5, 46, 22, 0.14);
-}
-
-.ptpn-demo-choice:focus {
-  outline: 2px solid var(--ptpn-orange);
-  outline-offset: 2px;
-}
-
-.ptpn-demo-choice-hint {
-  margin-top: 0.55rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--ptpn-orange-deep);
-}
-
-.ptpn-demo-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.ptpn-demo-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(5, 46, 22, 0.12);
-}
-
-.ptpn-demo-card:focus {
-  outline: 2px solid var(--ptpn-orange);
-  outline-offset: 2px;
-}
-
-.ptpn-demo-card--orange {
-  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-  border-color: rgba(234, 88, 12, 0.35);
-}
-
-.ptpn-demo-card--orange:hover::before {
-  opacity: 1;
-  background: linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, transparent 100%);
-}
-
-.ptpn-demo-card--green {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border-color: rgba(21, 128, 61, 0.35);
-}
-
-.ptpn-demo-card--green:hover::before {
-  opacity: 1;
-  background: linear-gradient(135deg, rgba(21, 128, 61, 0.1) 0%, transparent 100%);
-}
-
-.ptpn-demo-card .role {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--ptpn-green-deep);
-}
-
-.ptpn-demo-card .hint {
-  font-size: 0.75rem;
-  color: #64748b;
-  margin-top: 0.15rem;
-}
-
-.ptpn-demo-card .creds {
-  font-family: ui-monospace, monospace;
-  font-size: 0.78rem;
-  margin-top: 0.5rem;
-  color: #334155;
-  word-break: break-all;
-}
-
-.ptpn-demo-card .action-hint {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ptpn-orange);
-  margin-top: 0.5rem;
-}
-
-.ptpn-copy-btn {
-  border: none;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 0.35rem;
-  padding: 0.15rem 0.45rem;
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--ptpn-green);
-  margin-left: 0.35rem;
-  vertical-align: middle;
-  transition: background 0.15s ease;
-}
-
-.ptpn-copy-btn:hover {
-  background: #fff;
-}
-
-.toast-ptpn-copy {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background: var(--ptpn-green-deep);
-  color: #fff;
-  padding: 0.65rem 1.1rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  box-shadow: 0 8px 28px rgba(5, 46, 22, 0.35);
-  z-index: 1080;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  pointer-events: none;
-}
-
-.toast-ptpn-copy.show {
-  opacity: 1;
-  transform: translateY(0);
 }

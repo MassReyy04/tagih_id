@@ -14,19 +14,20 @@
         </a>
     </div>
 
-    @if (session('status'))
-        <div class="alert alert-success border-0 shadow-sm alert-dismissible fade show px-4 py-3" style="border-left:5px solid var(--ptpn-orange)!important; border-radius: 12px;">
+    @if (session('delete'))
+        <div class="alert alert-danger border-0 shadow-sm alert-dismissible fade show px-4 py-3" style="border-left:5px solid #dc3545!important; border-radius: 12px;">
             <div class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-circle-check fa-lg text-success"></i>
-                <div class="fw-semibold text-dark">{{ session('status') }}</div>
+                <i class="fa-solid fa-trash-can fa-lg text-danger"></i>
+                <div class="fw-semibold text-dark">{{ session('delete') }}</div>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    <form method="get" class="card ptpn-card border-0 shadow-sm p-3 mb-4">
-        <div class="row g-2 align-items-center">
-            <div class="col-md-6 col-lg-5">
+    <form method="get" class="card ptpn-card border-0 shadow-sm p-4 mb-4">
+        <div class="row g-3">
+            <div class="col-md-12 col-lg-4">
+                <label class="form-label small fw-bold text-muted text-uppercase">Pencarian</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0 text-muted">
                         <i class="fa-solid fa-magnifying-glass small"></i>
@@ -34,8 +35,27 @@
                     <input type="search" name="q" value="{{ request('q') }}" class="form-control border-start-0 ps-0" placeholder="Cari mitra, usaha, nomor surat…">
                 </div>
             </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-outline-primary px-4 rounded-pill">Cari Data</button>
+            <div class="col-md-6 col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Kecamatan</label>
+                <input type="text" name="kecamatan" value="{{ request('kecamatan') }}" class="form-control" placeholder="Semua Kecamatan">
+            </div>
+            <div class="col-md-6 col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Kelurahan</label>
+                <input type="text" name="kelurahan" value="{{ request('kelurahan') }}" class="form-control" placeholder="Semua Kelurahan">
+            </div>
+            <div class="col-md-6 col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Dari Tanggal</label>
+                <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-control">
+            </div>
+            <div class="col-md-6 col-lg-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Sampai Tanggal</label>
+                <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control">
+            </div>
+            <div class="col-12 text-end mt-3">
+                <a href="{{ route('monitoring.index') }}" class="btn btn-light px-4 rounded-pill me-2">Reset</a>
+                <button type="submit" class="btn btn-primary px-4 rounded-pill">
+                    <i class="fa-solid fa-filter me-1 small"></i> Terapkan Filter
+                </button>
             </div>
         </div>
     </form>
@@ -83,12 +103,12 @@
                                     <a href="{{ route('monitoring.edit', $row) }}" class="btn btn-sm btn-white border-0 px-3 border-start" title="Edit">
                                         <i class="fa-solid fa-pen-to-square text-success"></i>
                                     </a>
-                                    @if (auth()->user()->isAdmin())
-                                        <form action="{{ route('monitoring.destroy', $row) }}" method="post" class="d-inline" onsubmit="return confirm('Hapus data ini?');">
+                                     @if (auth()->user()->isAdmin())
+                                        <form action="{{ route('monitoring.destroy', $row) }}" method="post" class="d-inline delete-form">
                                             @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-white border-0 px-3 border-start" title="Hapus">
-                                                <i class="fa-solid fa-trash-can text-danger"></i>
+                                            @method('delete')
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn" title="Hapus">
+                                                <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </form>
                                     @endif
@@ -112,3 +132,33 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const form = this.closest('.delete-form');
+        Swal.fire({
+            title: 'Hapus data ini?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            didOpen: () => {
+                if (typeof playNotificationSound === 'function') {
+                    // Opsional: putar suara peringatan jika ada
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+@endpush

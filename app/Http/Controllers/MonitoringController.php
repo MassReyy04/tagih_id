@@ -46,6 +46,22 @@ class MonitoringController extends Controller
             });
         }
 
+        if ($request->filled('kecamatan')) {
+            $query->where('geo_kecamatan', 'like', '%'.$request->string('kecamatan').'%');
+        }
+
+        if ($request->filled('kelurahan')) {
+            $query->where('geo_kelurahan', 'like', '%'.$request->string('kelurahan').'%');
+        }
+
+        if ($request->filled('date_from')) {
+            $query->where('tanggal', '>=', $request->date('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->where('tanggal', '<=', $request->date('date_to'));
+        }
+
         $items = $query->paginate(15)->withQueryString();
 
         return view('monitoring.index', compact('items'));
@@ -212,7 +228,7 @@ class MonitoringController extends Controller
         // Urutkan ulang nomor surat pada tanggal yang sama agar tidak ada gap
         $this->nomorSuratService->reindexNomorSurat($tanggal);
 
-        return redirect()->route('monitoring.index')->with('status', 'Data telah dihapus dan nomor surat telah diurutkan ulang.');
+        return redirect()->route('monitoring.index')->with('delete', 'Data telah dihapus dan nomor surat telah diurutkan ulang.');
     }
 
     public function pdf(MonitoringPenagihan $monitoring)

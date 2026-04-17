@@ -102,6 +102,6 @@ class UserManagementController extends Controller
 
         return redirect()
             ->route('admin.users.index')
-            ->with('status', 'Petugas berhasil dihapus.');
+            ->with('delete', 'Petugas berhasil dihapus.');
     }
 }

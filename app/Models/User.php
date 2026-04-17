@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'profile_photo',
     ];
 
     /**
@@ -48,6 +49,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function profilePhotoUrl(): ?string
+    {
+        return $this->profile_photo ? asset('storage/'.$this->profile_photo) : null;
     }
 
     public function monitoringPenagihan(): HasMany

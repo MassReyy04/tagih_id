@@ -6,7 +6,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name', 'Laravel')) — PTPN IV Regional 4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <style>
+        .swal2-toast {
+            padding: 0.75rem 1rem !important;
+        }
+    </style>
 </head>
 <body class="ptpn-body">
     <div id="app">
@@ -74,13 +82,21 @@
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    <div class="rounded-circle bg-white text-success d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 32px; height: 32px; font-size: 0.85rem;">
-                                        {{ substr(Auth::user()->name, 0, 1) }}
-                                    </div>
+                                    @if(Auth::user()->profile_photo)
+                                        <img src="{{ Auth::user()->profilePhotoUrl() }}" alt="Profile" class="rounded-circle border shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
+                                    @else
+                                        <div class="rounded-circle bg-white text-success d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                            {{ substr(Auth::user()->name, 0, 1) }}
+                                        </div>
+                                    @endif
                                     <span class="d-none d-lg-inline">{{ Auth::user()->name }}</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2" style="border-radius:1rem; min-width: 180px;">
                                     <div class="dropdown-header text-uppercase small fw-bold text-muted letter-spacing-1">Pengaturan Akun</div>
+                                    <a class="dropdown-item py-2 {{ request()->routeIs('profile.edit') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
+                                        <i class="fa-solid fa-user-gear me-2 text-primary opacity-75"></i> Profil Saya
+                                    </a>
+                                    <div class="dropdown-divider mx-3"></div>
                                     <a class="dropdown-item py-2" href="{{ route('logout') }}"
                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         <i class="fa-solid fa-power-off me-2 text-danger opacity-75"></i> Keluar
@@ -108,5 +124,96 @@
         </footer>
     </div>
     @stack('scripts')
+    
+    {{-- Audio Elements --}}
+    <audio id="soundSuccess" preload="auto">
+        <source src="{{ asset('sounds/simpan.wav') }}" type="audio/wav">
+    </audio>
+    <audio id="soundDelete" preload="auto">
+        <source src="{{ asset('sounds/hapus.wav') }}" type="audio/wav">
+    </audio>
+
+    <script>
+        function playNotificationSound(type) {
+            const sound = document.getElementById(type === 'success' ? 'soundSuccess' : 'soundDelete');
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(error => {
+                    console.log("Autoplay blocked or audio file missing:", error);
+                });
+            }
+        }
+    </script>
+    
+    @if (session('status') || session('success'))
+        <script>
+            playNotificationSound('success');
+            
+            // Animasi Konfeti Kecil
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#22c55e', '#166534', '#ffffff']
+            });
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('status') ?? session('success') }}",
+                showConfirmButton: false,
+                timer: 3000,
+                toast: true,
+                position: 'top-end',
+                timerProgressBar: true,
+                background: '#f0fdf4',
+                color: '#166534',
+                iconColor: '#22c55e',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInRight'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutRight'
+                }
+            });
+        </script>
+    @endif
+
+    @if (session('delete'))
+        <script>
+            playNotificationSound('delete');
+            Swal.fire({
+                icon: 'success',
+                title: 'Dihapus!',
+                text: "{{ session('delete') }}",
+                showConfirmButton: false,
+                timer: 3000,
+                toast: true,
+                position: 'top-end',
+                timerProgressBar: true,
+                background: '#fff1f2',
+                color: '#991b1b',
+                iconColor: '#f43f5e',
+                showClass: {
+                    popup: 'animate__animated animate__shakeX'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutRight'
+                }
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: "{{ session('error') }}",
+                showConfirmButton: true,
+                confirmButtonColor: '#ea580c',
+            });
+        </script>
+    @endif
 </body>
 </html>

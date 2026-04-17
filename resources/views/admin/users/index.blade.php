@@ -4,9 +4,9 @@
 
 @section('content')
 <div class="container">
-    @if (session('status'))
-        <div class="alert alert-success border-0 shadow-sm alert-dismissible fade show" role="alert" style="border-left: 4px solid #ea580c !important;">
-            {{ session('status') }}
+    @if (session('delete'))
+        <div class="alert alert-danger border-0 shadow-sm alert-dismissible fade show" role="alert" style="border-left: 4px solid #dc3545 !important;">
+            {{ session('delete') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -112,11 +112,11 @@
                                             <a href="{{ route('admin.users.edit', $u) }}" class="btn btn-sm btn-white border-0 px-3" title="Edit">
                                                 <i class="fa-solid fa-user-pen text-primary"></i>
                                             </a>
-                                            <form method="post" action="{{ route('admin.users.destroy', $u) }}" onsubmit="return confirm('Hapus petugas ini?');" class="d-inline">
+                                            <form method="post" action="{{ route('admin.users.destroy', $u) }}" class="d-inline delete-user-form">
                                                 @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-white border-0 px-3 border-start" title="Hapus">
-                                                    <i class="fa-solid fa-user-minus text-danger"></i>
+                                                @method('delete')
+                                                <button type="button" class="btn btn-sm btn-outline-danger delete-user-btn" title="Hapus Petugas">
+                                                    <i class="fa-solid fa-trash-can"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -144,4 +144,29 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.querySelectorAll('.delete-user-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const form = this.closest('.delete-user-form');
+        Swal.fire({
+            title: 'Hapus petugas ini?',
+            text: "Data petugas dan semua riwayat inputnya akan terhapus!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+@endpush
 

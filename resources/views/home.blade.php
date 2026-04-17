@@ -24,41 +24,57 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-8">
             <div class="card ptpn-card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center gap-3 p-4">
-                    <div class="stat-card-icon stat-card-icon--green shadow-sm">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                    </div>
-                    <div>
-                        <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;">Total Kunjungan</div>
-                        <div class="h2 mb-0 fw-bold" style="color: var(--ptpn-green-deep);">{{ number_format($total) }}</div>
+                <div class="card-header ptpn-card-header bg-transparent border-0 px-4 pt-4 pb-0">
+                    <h5 class="fw-bold mb-0">Tren Kunjungan 6 Bulan Terakhir</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div style="height: 250px;">
+                        <canvas id="visitChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card ptpn-card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center gap-3 p-4">
-                    <div class="stat-card-icon stat-card-icon--orange shadow-sm">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </div>
-                    <div>
-                        <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;">Kunjungan Bulan Ini</div>
-                        <div class="h2 mb-0 fw-bold" style="color: var(--ptpn-orange-deep);">{{ number_format($bulanIni) }}</div>
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="card ptpn-card border-0 shadow-sm">
+                        <div class="card-body d-flex align-items-center gap-3 p-4">
+                            <div class="stat-card-icon stat-card-icon--green shadow-sm">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;">Total Kunjungan</div>
+                                <div class="h2 mb-0 fw-bold" style="color: var(--ptpn-green-deep);">{{ number_format($total) }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card ptpn-card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center gap-3 p-4">
-                    <div class="stat-card-icon stat-card-icon--muted shadow-sm">
-                        <i class="fa-solid fa-leaf"></i>
+                <div class="col-12">
+                    <div class="card ptpn-card border-0 shadow-sm">
+                        <div class="card-body d-flex align-items-center gap-3 p-4">
+                            <div class="stat-card-icon stat-card-icon--orange shadow-sm">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;">Kunjungan Bulan Ini</div>
+                                <div class="h2 mb-0 fw-bold" style="color: var(--ptpn-orange-deep);">{{ number_format($bulanIni) }}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;">Periode Aktif</div>
-                        <div class="h4 fw-bold mb-0" style="color: var(--ptpn-green);">{{ now()->translatedFormat('F Y') }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="card ptpn-card border-0 shadow-sm">
+                        <div class="card-body d-flex align-items-center gap-3 p-4">
+                            <div class="stat-card-icon stat-card-icon--muted shadow-sm">
+                                <i class="fa-solid fa-leaf"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;">Periode Aktif</div>
+                                <div class="h4 fw-bold mb-0" style="color: var(--ptpn-green);">{{ now()->translatedFormat('F Y') }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -129,3 +145,57 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('visitChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {!! json_encode($chartData['labels']) !!},
+            datasets: [{
+                label: 'Jumlah Kunjungan',
+                data: {!! json_encode($chartData['values']) !!},
+                borderColor: '#166534',
+                backgroundColor: 'rgba(22, 101, 52, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#166534'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    },
+                    grid: {
+                        display: true,
+                        drawBorder: false,
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+@endpush
