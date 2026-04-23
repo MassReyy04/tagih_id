@@ -62,7 +62,7 @@ class MonitoringController extends Controller
             $query->where('tanggal', '<=', $request->date('date_to'));
         }
 
-        $items = $query->paginate(15)->withQueryString();
+        $items = $query->paginate(10)->withQueryString();
 
         return view('monitoring.index', compact('items'));
     }

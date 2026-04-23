@@ -25,7 +25,7 @@ class UserManagementController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         return view('admin.users.index', compact('users', 'q'));
