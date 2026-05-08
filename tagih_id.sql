@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 08 Apr 2026 pada 06.42
+-- Waktu pembuatan: 05 Bulan Mei 2026 pada 08.59
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -155,7 +155,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (13, '2026_04_02_000003_ensure_users_role_string', 5),
 (14, '2026_04_07_120000_add_unique_index_to_monitoring_penagihan_nomor_surat', 6),
 (15, '2026_04_07_130000_add_geotag_address_fields_to_monitoring_penagihan', 7),
-(16, '2026_04_07_180000_update_default_user_emails_to_ptpn_domain', 8);
+(16, '2026_04_07_180000_update_default_user_emails_to_ptpn_domain', 8),
+(17, '2026_04_14_010436_add_profile_photo_to_users_table', 9),
+(18, '2026_04_29_070955_add_profile_photo_to_users_table', 10);
 
 -- --------------------------------------------------------
 
@@ -194,14 +196,6 @@ CREATE TABLE `monitoring_penagihan` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data untuk tabel `monitoring_penagihan`
---
-
-INSERT INTO `monitoring_penagihan` (`id`, `nomor_surat`, `nama_mitra`, `nama_usaha`, `nomor_induk`, `alamat`, `no_hp`, `nilai_pinjaman`, `sisa_pinjaman`, `alasan`, `janji`, `catatan`, `kebutuhan`, `tanggal`, `signature_mitra`, `signature_petugas`, `foto`, `latitude`, `longitude`, `geo_jalan`, `geo_kelurahan`, `geo_kecamatan`, `geo_kota`, `geo_provinsi`, `geo_kode_pos`, `geo_negara`, `user_id`, `created_at`, `updated_at`) VALUES
-(18, 'BAM 4/08/IV/2026', 'saiful', 'RM.CAHYA PADANG', 'NIM-2019', 'JL.PATTIMURA', '081234876509', 20000000.00, 10000000.00, '-', '-', 'BAYAR HARI INI Rp.1.000.000', '-', '2026-04-08', 'signatures/mitra_1775619672_o5thj8qo.png', 'signatures/petugas_1775619672_7d4rc9bh.png', 'fotos/N8S4UiTNAGnhDmlR4GFSdAxPG1auHpfDbd0Jm1jI.jpg', -1.6679818, 103.5844661, 'Jalan Lingkar Barat', 'Kenali Asam Bawah', 'Kota Baru', 'Jambi', 'Jambi', '36129', NULL, 10, '2026-04-07 20:41:12', '2026-04-07 20:41:12'),
-(19, 'BAM 5/08/IV/2026', 'khomaruddin', 'toko sembako 2', 'NIM-2558', 'TALANGBAKUNG,', '-', 15000000.00, 10000000.00, '-', '-', 'BAYAR HARI INI RP.1.000.000', '-', '2026-04-08', 'signatures/mitra_1775619857_wm6cu6ex.png', 'signatures/petugas_1775619857_vbezkzyg.png', 'fotos/0oBkqYnyQ5QDDgFerEsMK3Ra91wDQgHtycS4a1Mr.jpg', -1.6679767, 103.5844476, 'Jalan Lingkar Barat', 'Kenali Asam Bawah', 'Kota Baru', 'Jambi', 'Jambi', '36129', NULL, 11, '2026-04-07 20:44:17', '2026-04-07 20:58:58');
 
 -- --------------------------------------------------------
 
@@ -262,6 +256,7 @@ CREATE TABLE `users` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `role` varchar(32) NOT NULL DEFAULT 'petugas',
+  `profile_photo` varchar(255) DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -269,15 +264,15 @@ CREATE TABLE `users` (
 -- Dumping data untuk tabel `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`, `role`, `is_active`) VALUES
-(1, 'Admin', 'adminrepo@gmail.com', NULL, '$2y$12$G8Xj3lEJ06ee/85nZtWX3u32KbfYgvP43xief1Tk0wSDJSzbHmT32', 't6Q5zi8TXvq2HLQYpbSxY8NntmLbZLgd8oWh1sJmWIFHgDxqkspjkUqsKqDZ', '2025-12-12 03:04:44', '2025-12-12 03:04:44', 'admin', 1),
-(2, 'Dr. Ahmad Wijaya', 'ahmad@example.com', NULL, '$2y$12$w3K.1cKj64FPinUJp0vRlum3gF/CW1r05PwzxVyHHOZeIAA8XKULa', NULL, '2025-12-12 03:04:44', '2025-12-12 03:04:44', 'dosen_mahasiswa', 1),
-(3, 'Siti Nurhaliza', 'siti@example.com', NULL, '$2y$12$Sv.gIjBC.nZ7WHgOcHUeVuugGRhzpt//aNX9qE4b77xF2oQrjSdyy', NULL, '2025-12-12 03:04:44', '2025-12-12 03:04:44', 'dosen_mahasiswa', 1),
-(4, 'Budi Santoso', 'budi@example.com', NULL, '$2y$12$T/kVdLuwPxYoENT5UpSBKuTlrtI2zdxDHMQBDb8BbYSir.tN12bu2', NULL, '2025-12-12 03:04:44', '2025-12-12 03:04:44', 'dosen_mahasiswa', 1),
-(5, 'Guest User', 'guest@example.com', NULL, '$2y$12$mFj7aOFfF2/ajxzN4ZAKxOFgGjnEEllrM6nxBTMwxEKDEuBdsQyli', NULL, '2025-12-12 03:04:45', '2025-12-12 03:04:45', 'guest', 1),
-(8, 'Admin', 'admin@ptpn.ac.id', NULL, '$2y$12$IbuJ1O/Jm2SYp2TQ6NEcP..uOeoMNwu7ChL1Ik3u1Kfv0x9iVdiW2', NULL, '2026-04-01 22:07:38', '2026-04-06 21:36:07', 'admin', 1),
-(10, 'andre', 'andre@ptpn.ac.id', NULL, '$2y$12$Wot0h3qkQipAzvruaJjlB.XqYVqonY8VRKBa16uD4D80Yv6S5Ik2u', NULL, '2026-04-07 19:28:40', '2026-04-07 19:28:40', 'petugas', 1),
-(11, 'Hasan Samik', 'Hasan@ptpn.ac.id', NULL, '$2y$12$7FJ9y4kVzag2KKLvyybZe.wSrAmzv81I4Tmtyl8JaEsKOhSNfWQHi', NULL, '2026-04-07 19:38:34', '2026-04-07 19:38:34', 'petugas', 1);
+INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`, `role`, `profile_photo`, `is_active`) VALUES
+(1, 'Admin', 'adminrepo@gmail.com', NULL, '$2y$12$G8Xj3lEJ06ee/85nZtWX3u32KbfYgvP43xief1Tk0wSDJSzbHmT32', 't6Q5zi8TXvq2HLQYpbSxY8NntmLbZLgd8oWh1sJmWIFHgDxqkspjkUqsKqDZ', '2025-12-12 03:04:44', '2025-12-12 03:04:44', 'admin', NULL, 1),
+(2, 'Dr. Ahmad Wijaya', 'ahmad@example.com', NULL, '$2y$12$w3K.1cKj64FPinUJp0vRlum3gF/CW1r05PwzxVyHHOZeIAA8XKULa', NULL, '2025-12-12 03:04:44', '2025-12-12 03:04:44', 'dosen_mahasiswa', NULL, 1),
+(3, 'Siti Nurhaliza', 'siti@example.com', NULL, '$2y$12$Sv.gIjBC.nZ7WHgOcHUeVuugGRhzpt//aNX9qE4b77xF2oQrjSdyy', NULL, '2025-12-12 03:04:44', '2025-12-12 03:04:44', 'dosen_mahasiswa', NULL, 1),
+(4, 'Budi Santoso', 'budi@example.com', NULL, '$2y$12$T/kVdLuwPxYoENT5UpSBKuTlrtI2zdxDHMQBDb8BbYSir.tN12bu2', NULL, '2025-12-12 03:04:44', '2025-12-12 03:04:44', 'dosen_mahasiswa', NULL, 1),
+(5, 'Guest User', 'guest@example.com', NULL, '$2y$12$mFj7aOFfF2/ajxzN4ZAKxOFgGjnEEllrM6nxBTMwxEKDEuBdsQyli', NULL, '2025-12-12 03:04:45', '2025-12-12 03:04:45', 'guest', NULL, 1),
+(8, 'Admin', 'admin@ptpn.ac.id', NULL, '$2y$12$yLnnCh3VWwzCCt/36sNgWeoMqHFdSnNYu7zv9dgoRxrjp7IvzqJty', NULL, '2026-04-01 22:07:38', '2026-04-16 19:57:42', 'admin', NULL, 1),
+(10, 'andre', 'andre@ptpn.ac.id', NULL, '$2y$12$Wot0h3qkQipAzvruaJjlB.XqYVqonY8VRKBa16uD4D80Yv6S5Ik2u', NULL, '2026-04-07 19:28:40', '2026-04-13 19:56:08', 'petugas', 'profile-photos/JxsrUpW30X63dY8Q5Ab6GtBtW3qPxoqnwBWNSbaP.jpg', 1),
+(11, 'Hasan Samik', 'Hasan@ptpn.ac.id', NULL, '$2y$12$7FJ9y4kVzag2KKLvyybZe.wSrAmzv81I4Tmtyl8JaEsKOhSNfWQHi', NULL, '2026-04-07 19:38:34', '2026-04-07 19:38:34', 'petugas', NULL, 1);
 
 --
 -- Indexes for dumped tables
@@ -388,13 +383,13 @@ ALTER TABLE `journals`
 -- AUTO_INCREMENT untuk tabel `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT untuk tabel `monitoring_penagihan`
 --
 ALTER TABLE `monitoring_penagihan`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT untuk tabel `personal_access_tokens`

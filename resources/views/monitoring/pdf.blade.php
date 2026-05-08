@@ -111,11 +111,11 @@
         </tr>
         <tr>
             <td class="k">Nilai pinjaman</td>
-            <td>Rp {{ number_format($m->nilai_pinjaman, 2, ',', '.') }}</td>
+            <td>Rp {{ number_format($m->nilai_pinjaman, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td class="k">Sisa pinjaman</td>
-            <td>Rp {{ number_format($m->sisa_pinjaman, 2, ',', '.') }}</td>
+            <td>Rp {{ number_format($m->sisa_pinjaman, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td class="k">Alasan tidak membayar</td>

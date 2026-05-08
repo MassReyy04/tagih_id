@@ -34,14 +34,14 @@
     </div>
     <div class="col-md-4">
         <label class="form-label" for="nilai_pinjaman">Nilai pinjaman <span class="text-danger">*</span></label>
-        <input type="number" step="0.01" min="0" class="form-control @error('nilai_pinjaman') is-invalid @enderror" id="nilai_pinjaman" name="nilai_pinjaman"
-               value="{{ old('nilai_pinjaman', $model->nilai_pinjaman ?? '') }}" required>
+        <input type="number" step="1" min="0" class="form-control @error('nilai_pinjaman') is-invalid @enderror" id="nilai_pinjaman" name="nilai_pinjaman"
+               value="{{ old('nilai_pinjaman', isset($model) ? (int)$model->nilai_pinjaman : '') }}" required>
         @error('nilai_pinjaman')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-4">
         <label class="form-label" for="sisa_pinjaman">Sisa pinjaman <span class="text-danger">*</span></label>
-        <input type="number" step="0.01" min="0" class="form-control @error('sisa_pinjaman') is-invalid @enderror" id="sisa_pinjaman" name="sisa_pinjaman"
-               value="{{ old('sisa_pinjaman', $model->sisa_pinjaman ?? '') }}" required>
+        <input type="number" step="1" min="0" class="form-control @error('sisa_pinjaman') is-invalid @enderror" id="sisa_pinjaman" name="sisa_pinjaman"
+               value="{{ old('sisa_pinjaman', isset($model) ? (int)$model->sisa_pinjaman : '') }}" required>
         @error('sisa_pinjaman')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-4">

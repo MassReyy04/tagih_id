@@ -99,6 +99,7 @@
                         <th class="py-3 text-uppercase small fw-bold text-muted">Mitra</th>
                         <th class="py-3 text-uppercase small fw-bold text-muted">Petugas</th>
                         <th class="py-3 text-uppercase small fw-bold text-muted">Tanggal</th>
+                        <th class="py-3 text-uppercase small fw-bold text-muted">Jam</th>
                         <th class="text-end pe-4"></th>
                     </tr>
                 </thead>
@@ -125,6 +126,9 @@
                             <td>
                                 <div class="text-dark">{{ $row->tanggal->translatedFormat('d M Y') }}</div>
                             </td>
+                            <td>
+                                <div class="text-dark">{{ $row->created_at->translatedFormat('H:i') }}</div>
+                            </td>
                             <td class="text-end pe-4">
                                 <a href="{{ route('monitoring.show', $row) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
                                     <i class="fa-solid fa-eye me-1 small"></i> Detail
@@ -133,7 +137,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-5">
+                            <td colspan="6" class="text-center text-muted py-5">
                                 <i class="fa-solid fa-folder-open fa-3x mb-3 opacity-25"></i>
                                 <p class="mb-0">Belum ada data kunjungan terbaru.</p>
                             </td>
