@@ -8,13 +8,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('home')
-        : redirect()->route('login');
-});
-
-Route::view('/selamat-datang', 'welcome')->name('welcome');
+// Redirect root ke halaman login
+Route::get('/', fn () => redirect()->route('login'))->name('landing');
 
 Auth::routes(['register' => false]);
 

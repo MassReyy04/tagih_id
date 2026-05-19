@@ -102,10 +102,7 @@
     </div>
 
     <div class="card ptpn-card mb-4">
-        <div class="card-header ptpn-card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <span class="fw-bold">Rekapan Detail Monitoring</span>
-            <span class="small text-muted">Berdasarkan filter yang diterapkan</span>
-        </div>
+        <div class="card-header ptpn-card-header fw-bold">Rekapan Detail Monitoring</div>
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
@@ -116,7 +113,8 @@
                         <th>NIM</th>
                         <th class="text-end">NILAI PINJAMAN</th>
                         <th class="text-end">SISA PINJAMAN</th>
-                        <th class="pe-4">CATATAN</th>
+                        <th>CATATAN</th>
+                        <th class="pe-4 text-center" style="width: 10rem;">AKSI</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -128,11 +126,25 @@
                             <td><code class="text-success small">{{ $row->nomor_induk }}</code></td>
                             <td class="text-end">Rp {{ number_format($row->nilai_pinjaman, 0, ',', '.') }}</td>
                             <td class="text-end text-danger fw-medium">Rp {{ number_format($row->sisa_pinjaman, 0, ',', '.') }}</td>
-                            <td class="pe-4 small text-muted">{{ Str::limit($row->catatan, 50) }}</td>
+                            <td class="small text-muted">{{ Str::limit($row->catatan, 50) }}</td>
+                            <td class="pe-4 text-center">
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a href="{{ route('monitoring.edit', $row->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                    <form action="{{ route('monitoring.destroy', $row->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data mitra {{ addslashes($row->nama_mitra) }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
+                            <td colspan="8" class="text-center text-muted py-5">
                                 <i class="fa-solid fa-folder-open fa-3x mb-3 opacity-25"></i>
                                 <p class="mb-0">Tidak ada data detail untuk periode ini.</p>
                             </td>

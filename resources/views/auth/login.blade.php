@@ -6,7 +6,7 @@
 <div class="row g-0 ptpn-login-wrap">
     <div class="col-lg-5 col-xl-4 ptpn-login-aside d-none d-lg-flex">
         <div class="ptpn-login-aside-inner">
-            <p class="lead-brand mb-0">PTPN IV — Nuansa Jambi</p>
+            <p class="lead-brand mb-0">PTPN IV Regional 4 Jambi</p>
             <h1>Monitoring &amp; penagihan mitra binaan</h1>
             <p class="mt-3 mb-0 opacity-90" style="max-width: 22rem; line-height: 1.65;">
                 Aplikasi berita acara kunjungan dengan nomor surat otomatis, tanda tangan digital, dan geotagging lokasi.
@@ -19,12 +19,11 @@
         <div class="ptpn-login-card mx-auto shadow-lg">
             <div class="text-center d-lg-none mb-3">
                 <p class="small text-success fw-bold text-uppercase mb-1" style="letter-spacing:0.15em;">PTPN IV Regional 4</p>
-                <h2 class="h5 text-dark mb-0">Masuk ke sistem</h2>
+                <h2 class="h5 text-dark mb-0">Selamat Datang di Sistem Penagihan</h2>
             </div>
-            <h2 class="d-none d-lg-block mb-1">Masuk ke sistem</h2>
+            <h2 class="d-none d-lg-block mb-1">Selamat Datang di Sistem Penagihan</h2>
             <p class="text-muted small mb-4">
-                Gunakan email dan kata sandi yang sudah terdaftar di database.
-                Sandi contoh biasanya <code class="text-success">password</code> — hanya email di kartu bawah (atau yang dibuat admin) yang valid.
+                Akses dashboard pengelolaan tagihan dan monitoring pembayaran secara terintegrasi.
             </p>
 
             <form method="POST" action="{{ route('login') }}" id="loginForm">
