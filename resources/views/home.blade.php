@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 tension: 0.4,
                 pointRadius: 4,
                 pointBackgroundColor: '#166534'
-            }]
+            }
         },
         options: {
             responsive: true,

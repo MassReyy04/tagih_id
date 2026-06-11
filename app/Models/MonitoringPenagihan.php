@@ -18,6 +18,7 @@ class MonitoringPenagihan extends Model
         'no_hp',
         'nilai_pinjaman',
         'sisa_pinjaman',
+        'hari_tunggakan',
         'alasan',
         'janji',
         'catatan',
@@ -41,6 +42,7 @@ class MonitoringPenagihan extends Model
         'tanggal' => 'date',
         'nilai_pinjaman' => 'decimal:2',
         'sisa_pinjaman' => 'decimal:2',
+        'hari_tunggakan' => 'integer',
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
     ];

@@ -55,6 +55,11 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('kolektibilitas.*') ? 'active fw-bold' : '' }}" href="{{ route('kolektibilitas.index') }}">
+                                        <i class="fa-solid fa-table-list me-1 small opacity-75"></i> Kolektibilitas
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active fw-bold' : '' }}" href="{{ route('admin.users.index') }}">
                                         <i class="fa-solid fa-users-gear me-1 small opacity-75"></i> Kelola Petugas
                                     </a>

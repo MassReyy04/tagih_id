@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KolektibilitasController;
 use App\Http\Controllers\GeocodingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MonitoringController;
@@ -27,6 +28,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/users/{user}/edit', [UserManagementController::class, 'edit'])->name('admin.users.edit');
         Route::put('/admin/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
         Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+
+        Route::get('/kolektibilitas', [KolektibilitasController::class, 'index'])->name('kolektibilitas.index');
+        Route::put('/kolektibilitas/bermasalah', [KolektibilitasController::class, 'updateBermasalah'])->name('kolektibilitas.bermasalah');
     });
 
     Route::get('geocode/reverse', [GeocodingController::class, 'reverse'])

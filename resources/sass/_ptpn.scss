@@ -127,6 +127,26 @@
   color: var(--ptpn-green-deep);
 }
 
+.ptpn-kolektibilitas-hitung {
+  background: linear-gradient(180deg, #fff9c4 0%, #fff59d 100%);
+  border-top: 2px solid #f9a825;
+}
+
+.ptpn-kolektibilitas-hitung__title {
+  background: rgba(249, 168, 37, 0.25);
+  border-bottom: 1px solid rgba(249, 168, 37, 0.45);
+  color: #5d4037;
+}
+
+.ptpn-kolektibilitas-hitung__formula {
+  max-width: 16rem;
+  font-size: 0.95rem;
+}
+
+.ptpn-kolektibilitas-hitung__labels td {
+  padding: 0.2rem 0;
+}
+
 .stat-card-icon {
   width: 48px;
   height: 48px;

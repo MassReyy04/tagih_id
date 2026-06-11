@@ -42,6 +42,8 @@
                         <dd class="col-sm-8">Rp {{ number_format($m->nilai_pinjaman, 0, ',', '.') }}</dd>
                         <dt class="col-sm-4">Sisa pinjaman</dt>
                         <dd class="col-sm-8">Rp {{ number_format($m->sisa_pinjaman, 0, ',', '.') }}</dd>
+                        <dt class="col-sm-4">Hari tunggakan</dt>
+                        <dd class="col-sm-8">{{ number_format($m->hari_tunggakan ?? 0) }} hari</dd>
                         <dt class="col-sm-4">Tanggal kunjungan</dt>
                         <dd class="col-sm-8">{{ $m->tanggal->translatedFormat('d F Y') }} <span class="text-muted">(Diupload: {{ $m->created_at->translatedFormat('d F Y H:i') }})</span></dd>
                         <dt class="col-sm-4">Alasan tidak membayar</dt>
