@@ -25,12 +25,26 @@
 
     <div class="row g-3 mb-4">
         <div class="col-md-8">
-            <div class="card ptpn-card h-100 border-0 shadow-sm">
-                <div class="card-header ptpn-card-header bg-transparent border-0 px-4 pt-4 pb-0">
-                    <h5 class="fw-bold mb-0">Tren Kunjungan 6 Bulan Terakhir</h5>
+            <div class="card ptpn-card ptpn-trend-chart h-100 border-0">
+                <div class="ptpn-trend-chart__header px-4 pt-4 pb-3">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="ptpn-trend-chart__icon">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Tren Kunjungan 6 Bulan Terakhir</h5>
+                            <p class="text-muted small mb-0">Perkembangan aktivitas penagihan mitra binaan</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    <div style="height: 250px;">
+                <div class="card-body px-3 px-md-4 pb-4 pt-0 position-relative">
+                    @if (array_sum($chartData['values']) === 0)
+                        <div class="ptpn-trend-chart__empty">
+                            <i class="fa-solid fa-chart-simple"></i>
+                            <span>Belum ada kunjungan dalam 6 bulan terakhir</span>
+                        </div>
+                    @endif
+                    <div class="ptpn-trend-chart__canvas-wrap">
                         <canvas id="visitChart"></canvas>
                     </div>
                 </div>
@@ -151,54 +165,127 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('visitChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
+    const canvas = document.getElementById('visitChart');
+    if (!canvas) {
+        return;
+    }
+
+    const labels = @json($chartData['labels']);
+    const values = @json($chartData['values']);
+    const lastIndex = values.length - 1;
+    const maxVal = Math.max(...values, 0);
+    const suggestedMax = maxVal === 0 ? 8 : Math.max(Math.ceil(maxVal * 1.3), maxVal + 1);
+
+    const ctx = canvas.getContext('2d');
+    const fillGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    fillGradient.addColorStop(0, 'rgba(21, 128, 61, 0.45)');
+    fillGradient.addColorStop(0.55, 'rgba(21, 128, 61, 0.12)');
+    fillGradient.addColorStop(1, 'rgba(234, 88, 12, 0.04)');
+
+    const lineGradient = ctx.createLinearGradient(0, 0, canvas.offsetWidth || 600, 0);
+    lineGradient.addColorStop(0, '#0d4f2d');
+    lineGradient.addColorStop(0.7, '#15803d');
+    lineGradient.addColorStop(1, '#ea580c');
+
+    const barColors = values.map((_, i) => {
+        if (i === lastIndex) {
+            return 'rgba(234, 88, 12, 0.28)';
+        }
+        return 'rgba(21, 128, 61, 0.14)';
+    });
+
+    new Chart(canvas, {
         data: {
-            labels: {!! json_encode($chartData['labels']) !!},
-            datasets: [{
-                label: 'Jumlah Kunjungan',
-                data: {!! json_encode($chartData['values']) !!},
-                borderColor: '#166534',
-                backgroundColor: 'rgba(22, 101, 52, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 4,
-                pointBackgroundColor: '#166534'
-            }
+            labels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Kunjungan',
+                    data: values,
+                    backgroundColor: barColors,
+                    hoverBackgroundColor: barColors.map((c, i) => i === lastIndex ? 'rgba(234, 88, 12, 0.45)' : 'rgba(21, 128, 61, 0.28)'),
+                    borderRadius: { topLeft: 10, topRight: 10, bottomLeft: 4, bottomRight: 4 },
+                    borderSkipped: false,
+                    barPercentage: 0.58,
+                    categoryPercentage: 0.72,
+                    order: 2,
+                },
+                {
+                    type: 'line',
+                    label: 'Tren',
+                    data: values,
+                    borderColor: lineGradient,
+                    backgroundColor: fillGradient,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.42,
+                    pointRadius: values.map((_, i) => i === lastIndex ? 7 : 5),
+                    pointHoverRadius: 9,
+                    pointBackgroundColor: values.map((_, i) => i === lastIndex ? '#ea580c' : '#15803d'),
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverBorderWidth: 3,
+                    order: 1,
+                },
+            ],
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            animation: {
+                duration: 900,
+                easing: 'easeOutQuart',
+            },
             plugins: {
-                legend: {
-                    display: false
-                }
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(5, 46, 22, 0.92)',
+                    titleFont: { size: 13, weight: '600' },
+                    bodyFont: { size: 13 },
+                    padding: 14,
+                    cornerRadius: 10,
+                    displayColors: false,
+                    callbacks: {
+                        title: (items) => items[0]?.label ?? '',
+                        label: (ctx) => ' ' + ctx.parsed.y + ' kunjungan',
+                    },
+                },
             },
             scales: {
                 y: {
                     beginAtZero: true,
+                    suggestedMax,
                     ticks: {
-                        stepSize: 1,
-                        precision: 0
+                        stepSize: maxVal <= 10 ? 1 : undefined,
+                        precision: 0,
+                        color: '#64748b',
+                        font: { size: 11, weight: '500' },
+                        padding: 8,
                     },
                     grid: {
-                        display: true,
+                        color: 'rgba(13, 79, 45, 0.08)',
                         drawBorder: false,
-                        color: 'rgba(0,0,0,0.05)'
-                    }
+                    },
+                    border: { display: false },
                 },
                 x: {
-                    grid: {
-                        display: false
-                    }
-                }
-            }
-        }
+                    ticks: {
+                        color: '#475569',
+                        font: { size: 11, weight: '600' },
+                        maxRotation: 0,
+                    },
+                    grid: { display: false },
+                    border: { display: false },
+                },
+            },
+        },
     });
 });
 </script>

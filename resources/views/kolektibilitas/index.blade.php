@@ -21,7 +21,7 @@
         </div>
         <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
             <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
-                <i class="fa-solid fa-rotate me-1"></i> Data diperbarui otomatis setiap hari
+                <i class="fa-solid fa-pen-to-square me-1"></i> Hari tunggakan diinput manual per NIM
             </span>
         </div>
     </div>
@@ -163,6 +163,74 @@
     <div class="row g-4 mb-4">
         <div class="col-lg-5">
             <div class="card ptpn-card h-100">
+                <div class="card-header ptpn-card-header fw-bold">Input hari tunggakan per NIM</div>
+                <div class="card-body">
+                    <p class="small text-muted">
+                        Masukkan NIM mitra dan hari tunggakan untuk klasifikasi kolektibilitas.
+                        Mitra harus memiliki sisa pinjaman aktif di data berita acara.
+                    </p>
+                    <form method="post" action="{{ route('kolektibilitas.mitra') }}">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="tanggal" value="{{ $tanggal->format('Y-m-d') }}">
+                        <div class="mb-3">
+                            <label class="form-label" for="nomor_induk">NIM (Nomor Induk Mitra)</label>
+                            <input type="text" class="form-control @error('nomor_induk') is-invalid @enderror"
+                                   id="nomor_induk" name="nomor_induk"
+                                   value="{{ old('nomor_induk') }}" placeholder="Contoh: MITRA-001" required>
+                            @error('nomor_induk')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="hari_tunggakan">Hari tunggakan</label>
+                            <input type="number" step="1" min="0" class="form-control @error('hari_tunggakan') is-invalid @enderror"
+                                   id="hari_tunggakan" name="hari_tunggakan"
+                                   value="{{ old('hari_tunggakan', 0) }}" required>
+                            @error('hari_tunggakan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="form-text">&le;30 Lancar · 31–180 Kurang Lancar · 181–270 Diragukan · &gt;270 Macet</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Simpan hari tunggakan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card ptpn-card h-100">
+                <div class="card-header ptpn-card-header fw-bold">Data hari tunggakan mitra</div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">NIM</th>
+                                <th>Nama mitra</th>
+                                <th class="text-end">Hari tunggakan</th>
+                                <th class="pe-4">Klasifikasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($mitraList as $mitra)
+                                <tr>
+                                    <td class="ps-4 font-monospace">{{ $mitra['nomor_induk'] }}</td>
+                                    <td>{{ $mitra['nama_mitra'] ?? '—' }}</td>
+                                    <td class="text-end">{{ number_format($mitra['hari_tunggakan']) }}</td>
+                                    <td class="pe-4">
+                                        <span class="badge bg-success bg-opacity-10 text-success">{{ $mitra['klasifikasi'] }}</span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Belum ada data hari tunggakan. Input NIM di form sebelah kiri.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="card ptpn-card h-100">
                 <div class="card-header ptpn-card-header fw-bold">Input saldo bermasalah</div>
                 <div class="card-body">
                     <p class="small text-muted">
@@ -230,7 +298,7 @@
         <div class="card-body small text-muted">
             <strong class="text-dark">Cara perhitungan:</strong>
             Saldo piutang diambil dari data kunjungan terbaru per mitra (berdasarkan nomor induk).
-            Klasifikasi mengikuti <em>hari tunggakan</em> yang diinput saat berita acara.
+            Klasifikasi mengikuti <em>hari tunggakan</em> yang diinput manual per NIM pada halaman ini.
             Nilai perkalian = Saldo × bobot (Lancar 100%, Kurang Lancar 75%, Diragukan 25%, Macet 0%).
             Tingkat kolektibilitas = Jumlah perkalian ÷ Jumlah saldo × 100%.
             Skor: &gt; 80 = 4, &gt; 70 = 3, &gt; 60 = 2, selain itu = 1.

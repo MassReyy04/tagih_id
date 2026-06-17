@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\KolektibilitasBermasalah;
+use App\Models\KolektibilitasMitra;
 use App\Models\MonitoringPenagihan;
 use App\Models\User;
 use App\Services\KolektibilitasService;
@@ -55,12 +56,18 @@ class KolektibilitasContohSeeder extends Seeder
                     'no_hp' => '0812345678'.str_pad((string) $seq, 2, '0', STR_PAD_LEFT),
                     'nilai_pinjaman' => $nilai,
                     'sisa_pinjaman' => $sisa,
-                    'hari_tunggakan' => $hari,
                     'alasan' => 'Contoh data kolektibilitas',
                     'catatan' => 'Data demo — MITRA-00'.$seq,
                     'tanggal' => $tanggal,
                     'user_id' => $petugas->id,
                 ]
+            );
+        }
+
+        foreach ($rows as [, $nama, $nim, , , $hari]) {
+            KolektibilitasMitra::query()->updateOrCreate(
+                ['nomor_induk' => $nim],
+                ['nama_mitra' => $nama, 'hari_tunggakan' => $hari]
             );
         }
 
@@ -78,7 +85,6 @@ class KolektibilitasContohSeeder extends Seeder
                 'no_hp' => '081234567801',
                 'nilai_pinjaman' => 200_000_000,
                 'sisa_pinjaman' => 150_000_000,
-                'hari_tunggakan' => 40,
                 'alasan' => 'Kunjungan lama (tidak dipakai di perhitungan)',
                 'catatan' => 'Data demo lama — MITRA-001',
                 'tanggal' => now()->subMonths(5)->toDateString(),

@@ -45,13 +45,6 @@
         @error('sisa_pinjaman')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-4">
-        <label class="form-label" for="hari_tunggakan">Hari tunggakan <span class="text-danger">*</span></label>
-        <input type="number" step="1" min="0" class="form-control @error('hari_tunggakan') is-invalid @enderror" id="hari_tunggakan" name="hari_tunggakan"
-               value="{{ old('hari_tunggakan', isset($model) ? (int)($model->hari_tunggakan ?? 0) : 0) }}" required>
-        @error('hari_tunggakan')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        <div class="form-text">Untuk klasifikasi kolektibilitas: &le;30 Lancar, 31–180 Kurang Lancar, 181–270 Diragukan, &gt;270 Macet.</div>
-    </div>
-    <div class="col-md-4">
         <label class="form-label" for="tanggal">Tanggal kunjungan <span class="text-danger">*</span></label>
         <input type="date" class="form-control @error('tanggal') is-invalid @enderror" id="tanggal" name="tanggal"
                value="{{ old('tanggal', isset($model) && $model->tanggal ? $model->tanggal->format('Y-m-d') : now()->format('Y-m-d')) }}" required>

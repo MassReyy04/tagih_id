@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateKolektibilitasBermasalahRequest;
+use App\Http\Requests\UpdateKolektibilitasMitraRequest;
 use App\Models\KolektibilitasSnapshot;
 use App\Services\KolektibilitasService;
 use Carbon\Carbon;
@@ -37,6 +38,7 @@ class KolektibilitasController extends Controller
             'tanggal' => $tanggal,
             'report' => $report,
             'snapshots' => $snapshots,
+            'mitraList' => $this->kolektibilitasService->listMitraHariTunggakan(),
         ]);
     }
 
@@ -54,5 +56,21 @@ class KolektibilitasController extends Controller
         return redirect()
             ->route('kolektibilitas.index', ['tanggal' => $tanggal->toDateString()])
             ->with('status', 'Saldo bermasalah berhasil diperbarui.');
+    }
+
+    public function updateMitra(UpdateKolektibilitasMitraRequest $request): RedirectResponse
+    {
+        $tanggal = Carbon::parse($request->input('tanggal'))->startOfDay();
+
+        $this->kolektibilitasService->setMitraHariTunggakan(
+            $request->input('nomor_induk'),
+            (int) $request->input('hari_tunggakan')
+        );
+
+        $this->kolektibilitasService->saveDailySnapshot($tanggal);
+
+        return redirect()
+            ->route('kolektibilitas.index', ['tanggal' => $tanggal->toDateString()])
+            ->with('status', 'Hari tunggakan untuk NIM '.$request->input('nomor_induk').' berhasil disimpan.');
     }
 }

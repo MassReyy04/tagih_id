@@ -50,23 +50,18 @@ class HomeController extends Controller
 
     private function buildMonthlyChartData(?int $userId): array
     {
-        $start = now()->copy()->subMonths(5)->startOfMonth();
-
-        $rows = MonitoringPenagihan::query()
-            ->when($userId, fn ($q) => $q->where('user_id', $userId))
-            ->where('tanggal', '>=', $start->toDateString())
-            ->get(['tanggal']);
-
-        $byMonth = $rows->groupBy(fn ($m) => $m->tanggal->format('Y-m'))
-            ->map->count();
-
         $labels = [];
         $values = [];
+
         for ($i = 5; $i >= 0; $i--) {
-            $d = now()->copy()->subMonths($i)->startOfMonth();
-            $key = $d->format('Y-m');
-            $labels[] = $d->translatedFormat('M Y');
-            $values[] = (int) ($byMonth[$key] ?? 0);
+            $month = now()->copy()->subMonths($i)->startOfMonth();
+            $labels[] = $month->translatedFormat('M Y');
+
+            $values[] = MonitoringPenagihan::query()
+                ->when($userId, fn ($q) => $q->where('user_id', $userId))
+                ->whereYear('tanggal', $month->year)
+                ->whereMonth('tanggal', $month->month)
+                ->count();
         }
 
         return ['labels' => $labels, 'values' => $values];

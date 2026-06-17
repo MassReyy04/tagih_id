@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/kolektibilitas', [KolektibilitasController::class, 'index'])->name('kolektibilitas.index');
         Route::put('/kolektibilitas/bermasalah', [KolektibilitasController::class, 'updateBermasalah'])->name('kolektibilitas.bermasalah');
+        Route::put('/kolektibilitas/mitra', [KolektibilitasController::class, 'updateMitra'])->name('kolektibilitas.mitra');
     });
 
     Route::get('geocode/reverse', [GeocodingController::class, 'reverse'])

@@ -21,7 +21,6 @@ class StoreMonitoringPenagihanRequest extends FormRequest
             'no_hp' => ['required', 'string', 'max:32'],
             'nilai_pinjaman' => ['required', 'numeric', 'min:0'],
             'sisa_pinjaman' => ['required', 'numeric', 'min:0'],
-            'hari_tunggakan' => ['required', 'integer', 'min:0'],
             'alasan' => ['nullable', 'string'],
             'janji' => ['nullable', 'string'],
             'catatan' => ['nullable', 'string'],

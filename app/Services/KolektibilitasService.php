@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\KolektibilitasBermasalah;
+use App\Models\KolektibilitasMitra;
 use App\Models\KolektibilitasSnapshot;
 use App\Models\MonitoringPenagihan;
 use Carbon\CarbonInterface;
@@ -72,12 +73,14 @@ class KolektibilitasService
             'macet' => 0.0,
         ];
 
+        $overrides = $this->getHariTunggakanMap();
+
         $records = MonitoringPenagihan::query()
             ->whereDate('tanggal', '<=', $asOf->toDateString())
             ->where('sisa_pinjaman', '>', 0)
             ->orderByDesc('tanggal')
             ->orderByDesc('id')
-            ->get(['nomor_induk', 'nama_mitra', 'sisa_pinjaman', 'hari_tunggakan']);
+            ->get(['nomor_induk', 'nama_mitra', 'sisa_pinjaman']);
 
         $seen = [];
 
@@ -91,7 +94,8 @@ class KolektibilitasService
             }
 
             $seen[$key] = true;
-            $category = $this->classifyHariTunggakan((int) ($row->hari_tunggakan ?? 0));
+            $hari = $overrides[$key] ?? 0;
+            $category = $this->classifyHariTunggakan($hari);
             $saldos[$category] += (float) $row->sisa_pinjaman;
         }
 
@@ -112,6 +116,57 @@ class KolektibilitasService
         KolektibilitasBermasalah::query()->updateOrCreate(
             ['tanggal' => $tanggal->toDateString()],
             ['saldo_bermasalah' => $saldo]
+        );
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function getHariTunggakanMap(): array
+    {
+        return KolektibilitasMitra::query()
+            ->pluck('hari_tunggakan', 'nomor_induk')
+            ->map(fn ($hari) => (int) $hari)
+            ->all();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, array{nomor_induk: string, nama_mitra: string|null, hari_tunggakan: int, klasifikasi: string}>
+     */
+    public function listMitraHariTunggakan()
+    {
+        return KolektibilitasMitra::query()
+            ->orderBy('nomor_induk')
+            ->get()
+            ->map(function (KolektibilitasMitra $row) {
+                $category = self::CATEGORIES[$this->classifyHariTunggakan($row->hari_tunggakan)];
+
+                return [
+                    'nomor_induk' => $row->nomor_induk,
+                    'nama_mitra' => $row->nama_mitra,
+                    'hari_tunggakan' => $row->hari_tunggakan,
+                    'klasifikasi' => $category['label'],
+                ];
+            });
+    }
+
+    public function setMitraHariTunggakan(string $nomorInduk, int $hariTunggakan): KolektibilitasMitra
+    {
+        $nim = trim($nomorInduk);
+
+        $latest = MonitoringPenagihan::query()
+            ->where('nomor_induk', $nim)
+            ->where('sisa_pinjaman', '>', 0)
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id')
+            ->first(['nama_mitra']);
+
+        return KolektibilitasMitra::query()->updateOrCreate(
+            ['nomor_induk' => $nim],
+            [
+                'nama_mitra' => $latest?->nama_mitra,
+                'hari_tunggakan' => $hariTunggakan,
+            ]
         );
     }
 
