@@ -4,17 +4,20 @@ namespace App\Services;
 
 use App\Models\KolektibilitasBermasalah;
 use App\Models\KolektibilitasMitra;
+use App\Models\KolektibilitasSaldoInput;
 use App\Models\KolektibilitasSnapshot;
 use App\Models\MonitoringPenagihan;
+use Carbon\Carbon;
 use Carbon\CarbonInterface;
 
 class KolektibilitasService
 {
-    /** @var list<array{min: float, skor: int, label: string}> */
+    /** @var list<array{skor: int, label: string}> */
     public const SKOR_THRESHOLDS = [
-        ['min' => 80, 'skor' => 4, 'label' => '> 80 = 4'],
-        ['min' => 70, 'skor' => 3, 'label' => '> 70 = 3'],
-        ['min' => 60, 'skor' => 2, 'label' => '> 60 = 2'],
+        ['skor' => 3, 'label' => '> 70 = 3'],
+        ['skor' => 2, 'label' => '40 s.d. 70 = 2'],
+        ['skor' => 1, 'label' => '10 s.d. 40 = 1'],
+        ['skor' => 0, 'label' => '< 10 = 0'],
     ];
 
     public const CATEGORIES = [
@@ -120,6 +123,50 @@ class KolektibilitasService
     }
 
     /**
+     * @return array{lancar: float, kurang_lancar: float, diragukan: float, macet: float, bermasalah: float}|null
+     */
+    public function getSaldoInput(CarbonInterface $tanggal): ?array
+    {
+        $row = KolektibilitasSaldoInput::query()
+            ->whereDate('tanggal', $tanggal->toDateString())
+            ->first();
+
+        if ($row === null) {
+            return null;
+        }
+
+        return [
+            'lancar' => (float) $row->saldo_lancar,
+            'kurang_lancar' => (float) $row->saldo_kurang_lancar,
+            'diragukan' => (float) $row->saldo_diragukan,
+            'macet' => (float) $row->saldo_macet,
+            'bermasalah' => (float) $row->saldo_bermasalah,
+        ];
+    }
+
+    /**
+     * @param array{lancar: float, kurang_lancar: float, diragukan: float, macet: float, bermasalah: float} $saldos
+     */
+    public function setSaldoInput(CarbonInterface $tanggal, array $saldos): void
+    {
+        KolektibilitasSaldoInput::query()->updateOrCreate(
+            ['tanggal' => $tanggal->toDateString()],
+            [
+                'saldo_lancar' => $saldos['lancar'],
+                'saldo_kurang_lancar' => $saldos['kurang_lancar'],
+                'saldo_diragukan' => $saldos['diragukan'],
+                'saldo_macet' => $saldos['macet'],
+                'saldo_bermasalah' => $saldos['bermasalah'],
+            ]
+        );
+
+        KolektibilitasBermasalah::query()->updateOrCreate(
+            ['tanggal' => $tanggal->toDateString()],
+            ['saldo_bermasalah' => $saldos['bermasalah']]
+        );
+    }
+
+    /**
      * @return array<string, int>
      */
     public function getHariTunggakanMap(): array
@@ -184,19 +231,19 @@ class KolektibilitasService
      */
     public function calculateSkor(float $nilai): array
     {
-        foreach (self::SKOR_THRESHOLDS as $threshold) {
-            if ($nilai > $threshold['min']) {
-                return [
-                    'skor' => $threshold['skor'],
-                    'label' => $threshold['label'],
-                ];
-            }
+        if ($nilai > 70) {
+            return ['skor' => 3, 'label' => '> 70 = 3'];
         }
 
-        return [
-            'skor' => 1,
-            'label' => '≤ 60 = 1',
-        ];
+        if ($nilai >= 40) {
+            return ['skor' => 2, 'label' => '40 s.d. 70 = 2'];
+        }
+
+        if ($nilai >= 10) {
+            return ['skor' => 1, 'label' => '10 s.d. 40 = 1'];
+        }
+
+        return ['skor' => 0, 'label' => '< 10 = 0'];
     }
 
     /**
@@ -217,8 +264,20 @@ class KolektibilitasService
      */
     public function buildReport(CarbonInterface $tanggal): array
     {
-        $saldos = $this->aggregateSaldos($tanggal);
-        $saldoBermasalah = $this->getSaldoBermasalah($tanggal);
+        $manualInput = $this->getSaldoInput($tanggal);
+
+        if ($manualInput !== null) {
+            $saldos = [
+                'lancar' => $manualInput['lancar'],
+                'kurang_lancar' => $manualInput['kurang_lancar'],
+                'diragukan' => $manualInput['diragukan'],
+                'macet' => $manualInput['macet'],
+            ];
+            $saldoBermasalah = $manualInput['bermasalah'];
+        } else {
+            $saldos = $this->aggregateSaldos($tanggal);
+            $saldoBermasalah = $this->getSaldoBermasalah($tanggal);
+        }
 
         $rows = [];
         $jumlahSaldo = 0.0;
@@ -278,6 +337,110 @@ class KolektibilitasService
         );
     }
 
+    /**
+     * Grafik kolektibilitas tahunan:
+     * - monthly.labels: Jan..(bulan sekarang / Des)
+     * - monthly.values: persentase nilai terakhir tiap bulan (snapshot terakhir pada bulan tsb)
+     * - monthly.keys: kunci bulan (YYYY-MM) untuk drilldown
+     * - dailyByMonth[YYYY-MM]: labels/value harian dalam bulan tersebut (berdasarkan snapshot yang tersimpan)
+     *
+     * @return array{
+     *   year: int,
+     *   monthly: array{labels: list<string>, values: list<float|null>, keys: list<string>},
+     *   dailyByMonth: array<string, array{
+     *     labels: list<string>,
+     *     values: list<float|null>,
+     *     entries: list<array{tanggal: string, label: string, nilai: float|null}>
+     *   }>
+     * }
+     */
+    public function buildKolektibilitasChart(int $year): array
+    {
+        $today = now();
+        $endMonth = ($today->year === $year) ? (int) $today->month : 12;
+
+        $rows = KolektibilitasSnapshot::query()
+            ->whereYear('tanggal', $year)
+            ->orderBy('tanggal')
+            ->get();
+
+        $saldoInputs = KolektibilitasSaldoInput::query()
+            ->whereYear('tanggal', $year)
+            ->orderBy('tanggal')
+            ->get();
+
+        $inputsByMonth = $saldoInputs->groupBy(fn (KolektibilitasSaldoInput $input) => $input->tanggal->format('Y-m'));
+        $snapshotsByMonth = $rows->groupBy(fn (KolektibilitasSnapshot $s) => $s->tanggal->format('Y-m'));
+
+        $monthlyLabels = [];
+        $monthlyValues = [];
+        $monthlyKeys = [];
+        $dailyByMonth = [];
+
+        for ($month = 1; $month <= $endMonth; $month++) {
+            $dt = Carbon::create($year, $month, 1)->startOfMonth();
+            $key = $dt->format('Y-m');
+
+            $monthlyLabels[] = $dt->translatedFormat('M Y');
+            $monthlyKeys[] = $key;
+
+            /** @var \Illuminate\Support\Collection<int, KolektibilitasSaldoInput> $monthInputs */
+            $monthInputs = $inputsByMonth->get($key, collect());
+
+            /** @var \Illuminate\Support\Collection<int, KolektibilitasSnapshot> $monthSnapshots */
+            $monthSnapshots = $snapshotsByMonth->get($key, collect());
+
+            $lastInput = $monthInputs->last();
+            $lastSnapshot = $monthSnapshots->last();
+            $monthlyValues[] = $lastInput
+                ? $this->calculateNilaiFromSaldoInput($lastInput)
+                : ($lastSnapshot ? $this->calculateNilaiFromSnapshot($lastSnapshot) : null);
+
+            $dailyLabels = [];
+            $dailyValues = [];
+            $entries = [];
+            foreach ($monthInputs as $input) {
+                $nilai = $this->calculateNilaiFromSaldoInput($input);
+                $dailyLabels[] = $input->tanggal->translatedFormat('d M');
+                $dailyValues[] = $nilai;
+                $entries[] = [
+                    'tanggal' => $input->tanggal->toDateString(),
+                    'label' => $input->tanggal->translatedFormat('d M Y'),
+                    'nilai' => $nilai,
+                ];
+            }
+
+            if ($entries === [] && $monthSnapshots->isNotEmpty()) {
+                foreach ($monthSnapshots as $snap) {
+                    $nilai = $this->calculateNilaiFromSnapshot($snap);
+                    $dailyLabels[] = $snap->tanggal->translatedFormat('d M');
+                    $dailyValues[] = $nilai;
+                    $entries[] = [
+                        'tanggal' => $snap->tanggal->toDateString(),
+                        'label' => $snap->tanggal->translatedFormat('d M Y'),
+                        'nilai' => $nilai,
+                    ];
+                }
+            }
+
+            $dailyByMonth[$key] = [
+                'labels' => $dailyLabels,
+                'values' => $dailyValues,
+                'entries' => $entries,
+            ];
+        }
+
+        return [
+            'year' => $year,
+            'monthly' => [
+                'labels' => $monthlyLabels,
+                'values' => $monthlyValues,
+                'keys' => $monthlyKeys,
+            ],
+            'dailyByMonth' => $dailyByMonth,
+        ];
+    }
+
     private function countActiveMitra(CarbonInterface $asOf): int
     {
         $records = MonitoringPenagihan::query()
@@ -298,5 +461,32 @@ class KolektibilitasService
         }
 
         return count($seen);
+    }
+
+    private function calculateNilaiFromSnapshot(KolektibilitasSnapshot $snapshot): ?float
+    {
+        $jumlahSaldo = (float) $snapshot->saldo_lancar
+            + (float) $snapshot->saldo_kurang_lancar
+            + (float) $snapshot->saldo_diragukan
+            + (float) $snapshot->saldo_macet;
+
+        $jumlahPerkalian = (float) $snapshot->nilai_perkalian_total;
+
+        return $this->calculateNilai($jumlahPerkalian, $jumlahSaldo);
+    }
+
+    private function calculateNilaiFromSaldoInput(KolektibilitasSaldoInput $input): ?float
+    {
+        $jumlahSaldo = (float) $input->saldo_lancar
+            + (float) $input->saldo_kurang_lancar
+            + (float) $input->saldo_diragukan
+            + (float) $input->saldo_macet;
+
+        $jumlahPerkalian = ((float) $input->saldo_lancar * self::CATEGORIES['lancar']['bobot'])
+            + ((float) $input->saldo_kurang_lancar * self::CATEGORIES['kurang_lancar']['bobot'])
+            + ((float) $input->saldo_diragukan * self::CATEGORIES['diragukan']['bobot'])
+            + ((float) $input->saldo_macet * self::CATEGORIES['macet']['bobot']);
+
+        return $this->calculateNilai($jumlahPerkalian, $jumlahSaldo);
     }
 }

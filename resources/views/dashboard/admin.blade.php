@@ -105,7 +105,7 @@
         <div class="card-header ptpn-card-header fw-bold">Rekapan Detail Monitoring</div>
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
-                <thead class="table-light">
+                <thead style="background: linear-gradient(90deg, #CBE1D4 0%, #D7E8DC 50%, #E0DFCC 100%); color: #14532d;">
                     <tr>
                         <th class="ps-4" style="width: 3rem;">NO.</th>
                         <th>NAMA MITRA</th>
@@ -162,7 +162,7 @@
         </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
-                <thead class="table-light">
+                <thead style="background: linear-gradient(90deg, #CBE1D4 0%, #D7E8DC 50%, #E0DFCC 100%); color: #14532d;">
                     <tr>
                         <th class="ps-4" style="width: 4rem;">Rank</th>
                         <th>Nama petugas</th>

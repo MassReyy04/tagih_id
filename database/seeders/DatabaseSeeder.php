@@ -27,5 +27,14 @@ class DatabaseSeeder extends Seeder
                 'role' => 'petugas',
             ]
         );
+
+        User::query()->updateOrCreate(
+            ['email' => 'pimpinan@ptpn.ac.id'],
+            [
+                'name' => 'Pimpinan',
+                'password' => Hash::make('password'),
+                'role' => 'regional',
+            ]
+        );
     }
 }

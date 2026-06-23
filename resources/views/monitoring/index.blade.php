@@ -9,9 +9,11 @@
             <h1 class="ptpn-page-title h2 mb-1">Data Berita Acara</h1>
             <p class="text-muted mb-0">Riwayat monitoring &amp; penagihan mitra binaan</p>
         </div>
-        <a href="{{ route('monitoring.create') }}" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill">
-            <i class="fa-solid fa-circle-plus me-1"></i> Input Berita Acara
-        </a>
+        @if (Auth::user() && !Auth::user()->isRegional())
+            <a href="{{ route('monitoring.create') }}" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill">
+                <i class="fa-solid fa-circle-plus me-1"></i> Input Berita Acara
+            </a>
+        @endif
     </div>
 
     @if (session('delete'))
@@ -63,19 +65,22 @@
     <div class="card ptpn-card border-0 shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
-                <thead class="bg-light">
+                <thead style="background: linear-gradient(90deg, #CBE1D4 0%, #D7E8DC 50%, #E0DFCC 100%); color: #14532d;">
                     <tr>
-                        <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Nomor Surat</th>
-                        <th class="py-3 text-uppercase small fw-bold text-muted">Mitra & Usaha</th>
-                        <th class="py-3 text-uppercase small fw-bold text-muted">Tanggal</th>
-                        <th class="py-3 text-uppercase small fw-bold text-muted">Jam</th>
-                        <th class="py-3 text-uppercase small fw-bold text-muted">Petugas</th>
-                        <th class="text-end pe-4 py-3 text-uppercase small fw-bold text-muted">Aksi</th>
+                        <th class="ps-4 py-3 text-uppercase small fw-bold">Nomor Surat</th>
+                        <th class="py-3 text-uppercase small fw-bold">Mitra</th>
+                        <th class="py-3 text-uppercase small fw-bold">Petugas</th>
+                        <th class="py-3 text-uppercase small fw-bold">Tanggal</th>
+                        <th class="py-3 text-uppercase small fw-bold">Jam</th>
+                        <th class="text-end pe-4 py-3 text-uppercase small fw-bold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($items as $row)
-                        <tr>
+                        @php
+                            $isBermasalah = $row->sisa_pinjaman > 0;
+                        @endphp
+                        <tr style="{{ $isBermasalah ? 'background-color: rgba(220, 53, 69, 0.08);' : '' }}">
                             <td class="ps-4">
                                 <span class="badge bg-success bg-opacity-10 text-success fw-medium px-2 py-1" style="font-family: 'Courier New', monospace; font-size: 0.85rem;">
                                     {{ $row->nomor_surat }}
@@ -104,17 +109,19 @@
                                     <a href="{{ route('monitoring.show', $row) }}" class="btn btn-sm btn-white border-0 px-3" title="Detail">
                                         <i class="fa-solid fa-eye text-primary"></i>
                                     </a>
-                                    <a href="{{ route('monitoring.edit', $row) }}" class="btn btn-sm btn-white border-0 px-3 border-start" title="Edit">
-                                        <i class="fa-solid fa-pen-to-square text-success"></i>
-                                    </a>
-                                     @if (auth()->user()->isAdmin())
-                                        <form action="{{ route('monitoring.destroy', $row) }}" method="post" class="d-inline delete-form">
-                                            @csrf
-                                            @method('delete')
-                                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn" title="Hapus">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </form>
+                                    @if (!auth()->user()->isRegional())
+                                        <a href="{{ route('monitoring.edit', $row) }}" class="btn btn-sm btn-white border-0 px-3 border-start" title="Edit">
+                                            <i class="fa-solid fa-pen-to-square text-success"></i>
+                                        </a>
+                                        @if (auth()->user()->isAdmin())
+                                            <form action="{{ route('monitoring.destroy', $row) }}" method="post" class="d-inline delete-form">
+                                                @csrf
+                                                @method('delete')
+                                                <button type="button" class="btn btn-sm btn-outline-danger delete-btn" title="Hapus">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
@@ -130,9 +137,34 @@
                 </tbody>
             </table>
         </div>
-        @if ($items->hasPages())
-            <div class="card-footer bg-transparent border-top-0 pt-0">{{ $items->links() }}</div>
-        @endif
+        <div class="card-footer bg-transparent border-top-0 pt-3 d-flex flex-wrap align-items-center justify-content-between gap-4">
+            <div class="d-flex flex-wrap align-items-center gap-4">
+                <form method="get" class="d-flex align-items-center gap-3">
+                    @foreach(request()->except('per_page') as $key => $value)
+                        @if(is_array($value))
+                            @foreach($value as $val)
+                                <input type="hidden" name="{{ $key }}[]" value="{{ $val }}">
+                            @endforeach
+                        @else
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <label class="form-label mb-0 small fw-medium text-muted">Rows Per Page</label>
+                    <select name="per_page" class="form-select form-select-sm rounded-pill" style="width: auto;" onchange="this.form.submit()">
+                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                        <option value="30" {{ request('per_page') == 30 ? 'selected' : '' }}>30</option>
+                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>ALL</option>
+                    </select>
+                </form>
+                <div class="small text-muted">
+                    Showing {{ $items->firstItem() }} to {{ $items->lastItem() }} of {{ $items->total() }} results
+                </div>
+            </div>
+            @if ($items->hasPages())
+                <div class="ms-auto">{{ $items->links('pagination::bootstrap-4') }}</div>
+            @endif
+        </div>
     </div>
 </div>
 @endsection

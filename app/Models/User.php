@@ -51,6 +51,11 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isRegional(): bool
+    {
+        return $this->role === 'regional';
+    }
+
     public function profilePhotoUrl(): ?string
     {
         return $this->profile_photo ? asset('storage/'.$this->profile_photo) : null;

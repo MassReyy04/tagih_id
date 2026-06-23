@@ -21,6 +21,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile/photo', [ProfileController::class, 'destroyPhoto'])->name('profile.photo.destroy');
 
+    Route::get('/kolektibilitas', [KolektibilitasController::class, 'index'])->name('kolektibilitas.index');
+
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard-admin', [DashboardController::class, 'index'])->name('dashboard.admin');
         Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
@@ -29,9 +31,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
         Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
 
-        Route::get('/kolektibilitas', [KolektibilitasController::class, 'index'])->name('kolektibilitas.index');
+        Route::put('/kolektibilitas/saldo', [KolektibilitasController::class, 'updateSaldo'])->name('kolektibilitas.saldo');
         Route::put('/kolektibilitas/bermasalah', [KolektibilitasController::class, 'updateBermasalah'])->name('kolektibilitas.bermasalah');
         Route::put('/kolektibilitas/mitra', [KolektibilitasController::class, 'updateMitra'])->name('kolektibilitas.mitra');
+        Route::delete('/kolektibilitas/{kolektibilitas}', [KolektibilitasController::class, 'destroy'])->name('kolektibilitas.destroy');
     });
 
     Route::get('geocode/reverse', [GeocodingController::class, 'reverse'])

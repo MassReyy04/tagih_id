@@ -15,294 +15,254 @@
         <div class="col-lg-8">
             <h1 class="ptpn-page-title h2 mb-1">Kinerja Kolektibilitas</h1>
             <p class="text-muted mb-0">
-                Laporan agregat saldo piutang berdasarkan kualitas pinjaman —
+                Input saldo piutang per kualitas pinjaman —
                 <span class="text-success fw-semibold">PTPN IV Regional 4</span>
             </p>
         </div>
         <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
             <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
-                <i class="fa-solid fa-pen-to-square me-1"></i> Hari tunggakan diinput manual per NIM
+                <i class="fa-solid fa-pen-to-square me-1"></i> Input manual kolektibilitas
             </span>
         </div>
     </div>
 
     <div class="card ptpn-card mb-4">
-        <div class="card-header ptpn-card-header fw-bold">Filter periode</div>
+        <div class="card-header ptpn-card-header fw-bold">
+            <i class="fa-solid fa-pen-to-square me-1"></i> Input Saldo Kolektibilitas
+        </div>
         <div class="card-body">
-            <form method="get" action="{{ route('kolektibilitas.index') }}" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label small text-muted mb-1">Tanggal data</label>
-                    <input type="date" name="tanggal" class="form-control" value="{{ $tanggal->format('Y-m-d') }}" max="{{ now()->format('Y-m-d') }}">
+            <p class="small text-muted mb-3">
+                Pilih tanggal lalu klik <strong>Tampilkan</strong> untuk memuat data saldo tanggal tersebut,
+                atau <strong>Hari ini</strong> untuk tanggal sekarang.
+                Data tanggal hari ini akan tampil di dashboard depan setelah disimpan.
+            </p>
+
+            <form method="post" action="{{ route('kolektibilitas.saldo') }}" id="kolektibilitasSaldoForm">
+                @csrf
+                @method('PUT')
+
+                <div class="row g-3 align-items-end mb-4 pb-4 border-bottom">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-1" for="kolektibilitas_tanggal">Tanggal data</label>
+                        <input type="date" name="tanggal" id="kolektibilitas_tanggal"
+                            class="form-control @error('tanggal') is-invalid @enderror"
+                            value="{{ old('tanggal', $tanggal->format('Y-m-d')) }}"
+                            max="{{ now()->format('Y-m-d') }}" required>
+                        @error('tanggal')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-8 d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary" id="btnMuatTanggal">Tampilkan</button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnHariIni">Hari ini</button>
+                    </div>
                 </div>
-                <div class="col-md-8 d-flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-primary">Tampilkan</button>
-                    <a href="{{ route('kolektibilitas.index') }}" class="btn btn-outline-secondary">Hari ini</a>
+
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-4">
+                        <label class="form-label fw-medium" for="saldo_lancar">Lancar</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" name="saldo_lancar" id="saldo_lancar"
+                                class="form-control @error('saldo_lancar') is-invalid @enderror"
+                                value="{{ old('saldo_lancar', $saldoForForm['lancar']) }}"
+                                min="0" step="1" required>
+                        </div>
+                        @error('saldo_lancar')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="form-label fw-medium" for="saldo_kurang_lancar">Kurang Lancar</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" name="saldo_kurang_lancar" id="saldo_kurang_lancar"
+                                class="form-control @error('saldo_kurang_lancar') is-invalid @enderror"
+                                value="{{ old('saldo_kurang_lancar', $saldoForForm['kurang_lancar']) }}"
+                                min="0" step="1" required>
+                        </div>
+                        @error('saldo_kurang_lancar')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="form-label fw-medium" for="saldo_diragukan">Diragukan</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" name="saldo_diragukan" id="saldo_diragukan"
+                                class="form-control @error('saldo_diragukan') is-invalid @enderror"
+                                value="{{ old('saldo_diragukan', $saldoForForm['diragukan']) }}"
+                                min="0" step="1" required>
+                        </div>
+                        @error('saldo_diragukan')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="form-label fw-medium" for="saldo_macet">Macet</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" name="saldo_macet" id="saldo_macet"
+                                class="form-control @error('saldo_macet') is-invalid @enderror"
+                                value="{{ old('saldo_macet', $saldoForForm['macet']) }}"
+                                min="0" step="1" required>
+                        </div>
+                        @error('saldo_macet')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="form-label fw-medium" for="saldo_bermasalah">Bermasalah</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" name="saldo_bermasalah" id="saldo_bermasalah"
+                                class="form-control @error('saldo_bermasalah') is-invalid @enderror"
+                                value="{{ old('saldo_bermasalah', $saldoForForm['bermasalah']) }}"
+                                min="0" step="1" required>
+                        </div>
+                        @error('saldo_bermasalah')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Data
+                    </button>
                 </div>
             </form>
-            <p class="small text-muted mb-0 mt-3">
-                Data per <strong>{{ $tanggal->translatedFormat('d F Y') }}</strong>
-                · {{ number_format($report['mitra_count']) }} mitra dengan sisa pinjaman &gt; 0
-            </p>
         </div>
     </div>
 
-    <div class="card ptpn-card mb-4">
-        <div class="card-header ptpn-card-header fw-bold text-center">Kinerja Kolektibilitas {{ $report['tahun'] }}</div>
+    <div class="card ptpn-card">
+        <div class="card-header ptpn-card-header d-flex align-items-center gap-2 px-4 py-3">
+            <i class="fa-solid fa-clock-rotate-left text-success"></i>
+            <span class="fw-bold">Riwayat Input Kolektibilitas</span>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
-                <thead class="table-light">
+                <thead style="background: linear-gradient(90deg, #CBE1D4 0%, #D7E8DC 50%, #E0DFCC 100%); color: #14532d;">
                     <tr>
-                        <th class="ps-4">Kualitas Pinjaman</th>
-                        <th>Umur Piutang</th>
-                        <th class="text-end">Saldo Piutang</th>
-                        <th class="text-center" style="width: 7rem;">%</th>
-                        <th class="text-end pe-4" style="width: 12rem;">Perkalian</th>
+                        <th class="ps-4 py-3 text-uppercase small fw-bold">Tanggal</th>
+                        <th class="py-3 text-uppercase small fw-bold text-end">Lancar</th>
+                        <th class="py-3 text-uppercase small fw-bold text-end">Kurang Lancar</th>
+                        <th class="py-3 text-uppercase small fw-bold text-end">Diragukan</th>
+                        <th class="py-3 text-uppercase small fw-bold text-end">Macet</th>
+                        <th class="py-3 text-uppercase small fw-bold text-end">Bermasalah</th>
+                        <th class="text-end pe-4 py-3 text-uppercase small fw-bold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($report['rows'] as $row)
+                    @forelse ($riwayat as $item)
                         <tr>
-                            <td class="ps-4 fw-medium">{{ $row['label'] }}</td>
-                            <td class="text-muted">{{ $row['umur'] }}</td>
-                            <td class="text-end">Rp {{ number_format($row['saldo'], 0, ',', '.') }}</td>
-                            <td class="text-center">{{ $row['bobot_label'] }}</td>
+                            <td class="ps-4 fw-bold text-dark">{{ $item->tanggal->translatedFormat('d F Y') }}</td>
+                            <td class="text-end font-monospace">Rp {{ number_format($item->saldo_lancar, 0, ',', '.') }}</td>
+                            <td class="text-end font-monospace">Rp {{ number_format($item->saldo_kurang_lancar, 0, ',', '.') }}</td>
+                            <td class="text-end font-monospace">Rp {{ number_format($item->saldo_diragukan, 0, ',', '.') }}</td>
+                            <td class="text-end font-monospace">Rp {{ number_format($item->saldo_macet, 0, ',', '.') }}</td>
+                            <td class="text-end font-monospace text-danger fw-bold">Rp {{ number_format($item->saldo_bermasalah, 0, ',', '.') }}</td>
                             <td class="text-end pe-4">
-                                @if ($row['perkalian'] > 0)
-                                    Rp {{ number_format($row['perkalian'], 0, ',', '.') }}
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
+                                <div class="btn-group shadow-sm rounded-pill overflow-hidden border">
+                                    <button type="button" class="btn btn-sm btn-white border-0 px-3 edit-kolek-btn" 
+                                        data-tanggal="{{ $item->tanggal->format('Y-m-d') }}"
+                                        title="Edit Data">
+                                        <i class="fa-solid fa-pen-to-square text-success"></i>
+                                    </button>
+                                    <form action="{{ route('kolektibilitas.destroy', $item) }}" method="post" class="d-inline delete-kolek-form">
+                                        @csrf
+                                        @method('delete')
+                                        <button type="button" class="btn btn-sm btn-white border-0 px-3 border-start delete-kolek-btn" title="Hapus Data">
+                                            <i class="fa-solid fa-trash-can text-danger"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
-                    @endforeach
-                    <tr class="table-light">
-                        <td class="ps-4 fw-bold">Jumlah</td>
-                        <td></td>
-                        <td class="text-end fw-bold">Rp {{ number_format($report['jumlah_saldo'], 0, ',', '.') }}</td>
-                        <td></td>
-                        <td class="text-end fw-bold pe-4">Rp {{ number_format($report['jumlah_perkalian'], 0, ',', '.') }}</td>
-                    </tr>
-                    <tr class="table-light">
-                        <td class="ps-4 fw-bold">Bermasalah</td>
-                        <td class="text-muted">—</td>
-                        <td class="text-end fw-bold">Rp {{ number_format($report['saldo_bermasalah'], 0, ',', '.') }}</td>
-                        <td class="text-muted text-center">—</td>
-                        <td class="text-muted pe-4">—</td>
-                    </tr>
-                    <tr class="table-light">
-                        <td class="ps-4 fw-bold">Total</td>
-                        <td></td>
-                        <td class="text-end fw-bold">Rp {{ number_format($report['total_saldo'], 0, ',', '.') }}</td>
-                        <td></td>
-                        <td class="text-end fw-bold pe-4">Rp {{ number_format($report['total_perkalian'], 0, ',', '.') }}</td>
-                    </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="fa-solid fa-folder-open fa-3x mb-3 opacity-25"></i>
+                                <p class="mb-0">Belum ada riwayat input kolektibilitas.</p>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
-
-        <div class="ptpn-kolektibilitas-hitung">
-            <div class="ptpn-kolektibilitas-hitung__title text-center fw-bold py-2">
-                Tahun {{ $report['tahun'] }}
-            </div>
-            <div class="p-3 p-md-4">
-                <div class="row g-3 align-items-center">
-                    <div class="col-lg-4">
-                        <table class="table table-sm table-borderless mb-0 ptpn-kolektibilitas-hitung__labels">
-                            <tbody>
-                                <tr>
-                                    <td class="fw-semibold">Tingkat Kolektibilitas</td>
-                                    <td class="text-end font-monospace">{{ number_format($report['jumlah_perkalian'], 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-semibold">Outstanding Pinjaman</td>
-                                    <td class="text-end font-monospace">{{ number_format($report['jumlah_saldo'], 0, ',', '.') }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-lg-5 text-center">
-                        <div class="ptpn-kolektibilitas-hitung__formula mx-auto">
-                            <div class="font-monospace">{{ number_format($report['jumlah_perkalian'], 0, ',', '.') }}</div>
-                            <hr class="my-1 border-dark opacity-75">
-                            <div class="font-monospace">{{ number_format($report['jumlah_saldo'], 0, ',', '.') }}</div>
-                        </div>
-                        <div class="mt-2 fw-semibold">× 100%</div>
-                    </div>
-                    <div class="col-lg-3">
-                        <table class="table table-sm table-borderless mb-0">
-                            <tbody>
-                                <tr>
-                                    <td class="fw-semibold">Nilai</td>
-                                    <td class="text-end fw-bold fs-5">
-                                        @if ($report['nilai'] !== null)
-                                            {{ number_format($report['nilai'], 2, ',', '.') }}
-                                        @else
-                                            <span class="text-muted">—</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-semibold">Skor</td>
-                                    <td class="text-end">
-                                        @if ($report['skor'] !== null)
-                                            <span class="fw-bold fs-5">{{ $report['skor'] }}</span>
-                                            <span class="d-block small text-muted">{{ $report['skor_label'] }}</span>
-                                        @else
-                                            <span class="text-muted">—</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4 mb-4">
-        <div class="col-lg-5">
-            <div class="card ptpn-card h-100">
-                <div class="card-header ptpn-card-header fw-bold">Input hari tunggakan per NIM</div>
-                <div class="card-body">
-                    <p class="small text-muted">
-                        Masukkan NIM mitra dan hari tunggakan untuk klasifikasi kolektibilitas.
-                        Mitra harus memiliki sisa pinjaman aktif di data berita acara.
-                    </p>
-                    <form method="post" action="{{ route('kolektibilitas.mitra') }}">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="tanggal" value="{{ $tanggal->format('Y-m-d') }}">
-                        <div class="mb-3">
-                            <label class="form-label" for="nomor_induk">NIM (Nomor Induk Mitra)</label>
-                            <input type="text" class="form-control @error('nomor_induk') is-invalid @enderror"
-                                   id="nomor_induk" name="nomor_induk"
-                                   value="{{ old('nomor_induk') }}" placeholder="Contoh: MITRA-001" required>
-                            @error('nomor_induk')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="hari_tunggakan">Hari tunggakan</label>
-                            <input type="number" step="1" min="0" class="form-control @error('hari_tunggakan') is-invalid @enderror"
-                                   id="hari_tunggakan" name="hari_tunggakan"
-                                   value="{{ old('hari_tunggakan', 0) }}" required>
-                            @error('hari_tunggakan')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <div class="form-text">&le;30 Lancar · 31–180 Kurang Lancar · 181–270 Diragukan · &gt;270 Macet</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan hari tunggakan</button>
+        @if ($riwayat->hasPages() || $riwayat->total() > 0)
+            <div class="card-footer bg-transparent border-top-0 pt-3 d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex flex-wrap align-items-center gap-4">
+                    <form method="get" class="d-flex align-items-center gap-3">
+                        @foreach(request()->except('per_page') as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <label class="form-label mb-0 small fw-medium text-muted">Rows Per Page</label>
+                        <select name="per_page" class="form-select form-select-sm rounded-pill" style="width: auto;" onchange="this.form.submit()">
+                            <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                            <option value="30" {{ request('per_page') == 30 ? 'selected' : '' }}>30</option>
+                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                            <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>ALL</option>
+                        </select>
                     </form>
+                    <div class="small text-muted">
+                        Showing {{ $riwayat->firstItem() }} to {{ $riwayat->lastItem() }} of {{ $riwayat->total() }} results
+                    </div>
                 </div>
+                @if ($riwayat->hasPages())
+                    <div class="ms-auto">{{ $riwayat->links('pagination::bootstrap-4') }}</div>
+                @endif
             </div>
-        </div>
-        <div class="col-lg-7">
-            <div class="card ptpn-card h-100">
-                <div class="card-header ptpn-card-header fw-bold">Data hari tunggakan mitra</div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">NIM</th>
-                                <th>Nama mitra</th>
-                                <th class="text-end">Hari tunggakan</th>
-                                <th class="pe-4">Klasifikasi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($mitraList as $mitra)
-                                <tr>
-                                    <td class="ps-4 font-monospace">{{ $mitra['nomor_induk'] }}</td>
-                                    <td>{{ $mitra['nama_mitra'] ?? '—' }}</td>
-                                    <td class="text-end">{{ number_format($mitra['hari_tunggakan']) }}</td>
-                                    <td class="pe-4">
-                                        <span class="badge bg-success bg-opacity-10 text-success">{{ $mitra['klasifikasi'] }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">Belum ada data hari tunggakan. Input NIM di form sebelah kiri.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4 mb-4">
-        <div class="col-lg-5">
-            <div class="card ptpn-card h-100">
-                <div class="card-header ptpn-card-header fw-bold">Input saldo bermasalah</div>
-                <div class="card-body">
-                    <p class="small text-muted">
-                        Saldo piutang bermasalah di luar klasifikasi Lancar–Macet. Diisi manual oleh admin dan disimpan per tanggal.
-                    </p>
-                    <form method="post" action="{{ route('kolektibilitas.bermasalah') }}">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="tanggal" value="{{ $tanggal->format('Y-m-d') }}">
-                        <div class="mb-3">
-                            <label class="form-label" for="saldo_bermasalah">Saldo bermasalah (Rp)</label>
-                            <input type="number" step="1" min="0" class="form-control @error('saldo_bermasalah') is-invalid @enderror"
-                                   id="saldo_bermasalah" name="saldo_bermasalah"
-                                   value="{{ old('saldo_bermasalah', (int) $report['saldo_bermasalah']) }}" required>
-                            @error('saldo_bermasalah')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan saldo bermasalah</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-7">
-            <div class="card ptpn-card h-100">
-                <div class="card-header ptpn-card-header fw-bold">Riwayat snapshot harian</div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Tanggal</th>
-                                <th class="text-end">Total saldo piutang</th>
-                                <th class="text-end pe-4">Nilai perkalian</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($snapshots as $snap)
-                                @php
-                                    $totalSaldo = (float) $snap->saldo_lancar
-                                        + (float) $snap->saldo_kurang_lancar
-                                        + (float) $snap->saldo_diragukan
-                                        + (float) $snap->saldo_macet
-                                        + (float) $snap->saldo_bermasalah;
-                                @endphp
-                                <tr>
-                                    <td class="ps-4">
-                                        <a href="{{ route('kolektibilitas.index', ['tanggal' => $snap->tanggal->format('Y-m-d')]) }}" class="text-decoration-none">
-                                            {{ $snap->tanggal->translatedFormat('d M Y') }}
-                                        </a>
-                                    </td>
-                                    <td class="text-end font-monospace">{{ number_format($totalSaldo, 0, ',', '.') }}</td>
-                                    <td class="text-end font-monospace pe-4">{{ number_format($snap->nilai_perkalian_total, 0, ',', '.') }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted py-4">Belum ada snapshot tersimpan.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card ptpn-card border-0 bg-light">
-        <div class="card-body small text-muted">
-            <strong class="text-dark">Cara perhitungan:</strong>
-            Saldo piutang diambil dari data kunjungan terbaru per mitra (berdasarkan nomor induk).
-            Klasifikasi mengikuti <em>hari tunggakan</em> yang diinput manual per NIM pada halaman ini.
-            Nilai perkalian = Saldo × bobot (Lancar 100%, Kurang Lancar 75%, Diragukan 25%, Macet 0%).
-            Tingkat kolektibilitas = Jumlah perkalian ÷ Jumlah saldo × 100%.
-            Skor: &gt; 80 = 4, &gt; 70 = 3, &gt; 60 = 2, selain itu = 1.
-        </div>
+        @endif
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tanggalInput = document.getElementById('kolektibilitas_tanggal');
+    const indexUrl = @json(route('kolektibilitas.index'));
+    const btnMuat = document.getElementById('btnMuatTanggal');
+    const btnHariIni = document.getElementById('btnHariIni');
+
+    function goToDate(dateValue) {
+        if (!dateValue) return;
+        window.location.href = indexUrl + '?tanggal=' + encodeURIComponent(dateValue);
+    }
+
+    btnMuat?.addEventListener('click', function () {
+        goToDate(tanggalInput?.value);
+    });
+
+    btnHariIni?.addEventListener('click', function () {
+        window.location.href = indexUrl;
+    });
+
+    // Fitur Edit: Muat data ke form
+    document.querySelectorAll('.edit-kolek-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tgl = this.getAttribute('data-tanggal');
+            goToDate(tgl);
+            // Form akan otomatis terisi setelah page reload dengan parameter tanggal
+        });
+    });
+
+    // Fitur Hapus dengan SweetAlert2
+    document.querySelectorAll('.delete-kolek-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const form = this.closest('.delete-kolek-form');
+            Swal.fire({
+                title: 'Hapus data kolektibilitas?',
+                text: "Data pada tanggal ini akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    tanggalInput?.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            goToDate(tanggalInput.value);
+        }
+    });
+});
+</script>
+@endpush

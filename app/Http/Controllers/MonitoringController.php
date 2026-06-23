@@ -31,8 +31,8 @@ class MonitoringController extends Controller
             ->latest('tanggal')
             ->latest('id');
 
-        // Jika bukan admin, hanya lihat data milik sendiri
-        if (! $user->isAdmin()) {
+        // Jika bukan admin dan bukan pimpinan, hanya lihat data milik sendiri
+        if (! $user->isAdmin() && ! $user->isRegional()) {
             $query->where('user_id', $user->id);
         }
 
@@ -62,18 +62,36 @@ class MonitoringController extends Controller
             $query->where('tanggal', '<=', $request->date('date_to'));
         }
 
-        $items = $query->paginate(10)->withQueryString();
+        $perPage = $request->input('per_page', 10);
+        if ($perPage === 'all') {
+            $items = $query->paginate($query->count())->withQueryString();
+        } else {
+            $perPage = (int) $perPage;
+            $items = in_array($perPage, [10, 30, 50]) 
+                ? $query->paginate($perPage)->withQueryString() 
+                : $query->paginate(10)->withQueryString();
+        }
 
         return view('monitoring.index', compact('items'));
     }
 
     public function create(): View
     {
+        $user = auth()->user();
+        if ($user->isRegional()) {
+            abort(403, 'Pimpinan tidak memiliki akses untuk membuat data baru.');
+        }
+
         return view('monitoring.create');
     }
 
     public function store(StoreMonitoringPenagihanRequest $request): RedirectResponse
     {
+        $user = auth()->user();
+        if ($user->isRegional()) {
+            abort(403, 'Pimpinan tidak memiliki akses untuk membuat data baru.');
+        }
+
         \Illuminate\Support\Facades\Log::info('Monitoring Store Request Received', [
             'user_id' => auth()->id(),
             'data_count' => count($request->all()),
@@ -129,7 +147,7 @@ class MonitoringController extends Controller
     public function show(MonitoringPenagihan $monitoring): View
     {
         $user = auth()->user();
-        if (! $user->isAdmin() && (int) $monitoring->user_id !== (int) $user->id) {
+        if (! $user->isAdmin() && ! $user->isRegional() && (int) $monitoring->user_id !== (int) $user->id) {
             abort(403, 'Anda tidak memiliki akses ke data ini.');
         }
 
@@ -141,6 +159,9 @@ class MonitoringController extends Controller
     public function edit(MonitoringPenagihan $monitoring): View
     {
         $user = auth()->user();
+        if ($user->isRegional()) {
+            abort(403, 'Pimpinan tidak memiliki akses untuk mengubah data.');
+        }
         if (! $user->isAdmin() && (int) $monitoring->user_id !== (int) $user->id) {
             abort(403, 'Anda tidak memiliki akses untuk mengubah data ini.');
         }
@@ -151,6 +172,9 @@ class MonitoringController extends Controller
     public function update(UpdateMonitoringPenagihanRequest $request, MonitoringPenagihan $monitoring): RedirectResponse
     {
         $user = auth()->user();
+        if ($user->isRegional()) {
+            abort(403, 'Pimpinan tidak memiliki akses untuk mengubah data.');
+        }
         if (! $user->isAdmin() && (int) $monitoring->user_id !== (int) $user->id) {
             abort(403, 'Anda tidak memiliki akses untuk mengubah data ini.');
         }
@@ -233,6 +257,11 @@ class MonitoringController extends Controller
 
     public function pdf(MonitoringPenagihan $monitoring)
     {
+        $user = auth()->user();
+        if ($user->isRegional()) {
+            abort(403, 'Pimpinan tidak memiliki akses untuk mencetak PDF.');
+        }
+
         $monitoring->load('user');
 
         $mapSig = null;

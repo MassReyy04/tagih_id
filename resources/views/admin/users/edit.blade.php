@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Petugas')
+@section('title', 'Edit Pengguna')
 
 @section('content')
 <div class="container">
     <div class="row mb-4 align-items-end">
         <div class="col-lg-8">
-            <h1 class="ptpn-page-title h2 mb-1">Edit Petugas</h1>
-            <p class="text-muted mb-0">Perbarui informasi akun <span class="fw-semibold">petugas penagih</span>.</p>
+            <h1 class="ptpn-page-title h2 mb-1">Edit Pengguna</h1>
+            <p class="text-muted mb-0">Perbarui informasi akun pengguna.</p>
         </div>
         <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
             <a href="{{ route('admin.users.index') }}" class="btn btn-outline-primary btn-sm">Kembali</a>
@@ -17,7 +17,7 @@
     <div class="row">
         <div class="col-lg-6">
             <div class="card ptpn-card">
-                <div class="card-header ptpn-card-header fw-bold">Data Petugas</div>
+                <div class="card-header ptpn-card-header fw-bold">Data Pengguna</div>
                 <div class="card-body">
                     <form method="post" action="{{ route('admin.users.update', $user) }}" class="vstack gap-3">
                         @csrf
@@ -29,6 +29,13 @@
                         <div>
                             <label class="form-label small text-muted mb-1">Email</label>
                             <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                        </div>
+                        <div>
+                            <label class="form-label small text-muted mb-1">Role</label>
+                            <select name="role" class="form-control" required>
+                                <option value="petugas" {{ old('role', $user->role) === 'petugas' ? 'selected' : '' }}>Petugas Penagih</option>
+                                <option value="regional" {{ old('role', $user->role) === 'regional' ? 'selected' : '' }}>Pimpinan</option>
+                            </select>
                         </div>
                         <div>
                             <label class="form-label small text-muted mb-1">Password Baru (Opsional)</label>

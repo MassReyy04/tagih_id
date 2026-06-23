@@ -16,8 +16,10 @@
             <p class="text-muted mb-0"><code class="text-success">{{ $m->nomor_surat }}</code></p>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <a href="{{ route('monitoring.pdf', $m) }}" class="btn btn-warning text-dark fw-semibold" target="_blank" rel="noopener">PDF berita acara</a>
-            <a href="{{ route('monitoring.edit', $m) }}" class="btn btn-outline-primary">Edit</a>
+            @if (!auth()->user()->isRegional())
+                <a href="{{ route('monitoring.pdf', $m) }}" class="btn btn-warning text-dark fw-semibold" target="_blank" rel="noopener">PDF berita acara</a>
+                <a href="{{ route('monitoring.edit', $m) }}" class="btn btn-outline-primary">Edit</a>
+            @endif
             <a href="{{ route('monitoring.index') }}" class="btn btn-outline-secondary">Kembali</a>
         </div>
     </div>

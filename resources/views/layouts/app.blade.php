@@ -40,22 +40,27 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('monitoring.index') ? 'active fw-bold' : '' }}" href="{{ route('monitoring.index') }}">
-                                    <i class="fa-solid fa-file-invoice me-1 small opacity-75"></i> Data Berita Acara
+                                    <i class="fa-solid fa-file-invoice me-1 small opacity-75"></i> Berita Acara Kunjungan
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('monitoring.create') ? 'active fw-bold' : '' }}" href="{{ route('monitoring.create') }}">
-                                    <i class="fa-solid fa-circle-plus me-1 small opacity-75"></i> Input Baru
-                                </a>
-                            </li>
+                            @if (!Auth::user()->isRegional())
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('monitoring.create') ? 'active fw-bold' : '' }}" href="{{ route('monitoring.create') }}">
+                                        <i class="fa-solid fa-circle-plus me-1 small opacity-75"></i> Input Baru
+                                    </a>
+                                </li>
+                            @endif
                             @if (Auth::user()->isAdmin())
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('dashboard.admin') ? 'active fw-bold' : '' }}" href="{{ route('dashboard.admin') }}">
                                         <i class="fa-solid fa-chart-pie me-1 small opacity-75"></i> Rekap &amp; Monitoring
                                     </a>
                                 </li>
+                            @endif
+                            @if (Auth::user()->isAdmin())
                                 <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('kolektibilitas.*') ? 'active fw-bold' : '' }}" href="{{ route('kolektibilitas.index') }}">
+                                    <a class="nav-link {{ request()->routeIs('kolektibilitas.*') ? 'active fw-bold' : '' }}"
+                                    href="{{ route('kolektibilitas.index') }}">
                                         <i class="fa-solid fa-table-list me-1 small opacity-75"></i> Kolektibilitas
                                     </a>
                                 </li>
@@ -79,9 +84,9 @@
                             @endif
                         @else
                             <li class="nav-item me-lg-3 mb-2 mb-lg-0">
-                                <span class="badge rounded-pill {{ Auth::user()->role === 'admin' ? 'badge-role-admin' : 'badge-role-petugas' }} px-3 py-2 shadow-sm">
-                                    <i class="fa-solid {{ Auth::user()->role === 'admin' ? 'fa-user-shield' : 'fa-user' }} me-1 small"></i>
-                                    {{ Auth::user()->role === 'admin' ? 'Admin' : 'Petugas Penagih' }}
+                                <span class="badge rounded-pill {{ Auth::user()->role === 'admin' ? 'badge-role-admin' : (Auth::user()->role === 'regional' ? 'bg-primary text-white' : 'badge-role-petugas') }} px-3 py-2 shadow-sm">
+                                    <i class="fa-solid {{ Auth::user()->role === 'admin' ? 'fa-user-shield' : (Auth::user()->role === 'regional' ? 'fa-building-columns' : 'fa-user') }} me-1 small"></i>
+                                    {{ Auth::user()->role === 'admin' ? 'Admin' : (Auth::user()->role === 'regional' ? 'Pimpinan' : 'Petugas Penagih') }}
                                 </span>
                             </li>
                             <li class="nav-item dropdown">

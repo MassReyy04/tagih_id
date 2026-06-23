@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Kelola Petugas')
+@section('title', 'Kelola Pengguna')
 
 @section('content')
 <div class="container">
@@ -24,8 +24,8 @@
 
     <div class="row mb-4 align-items-end">
         <div class="col-lg-8">
-            <h1 class="ptpn-page-title h2 mb-1">Kelola Petugas</h1>
-            <p class="text-muted mb-0">Tambah atau perbarui akun <span class="fw-semibold">petugas penagih</span>.</p>
+            <h1 class="ptpn-page-title h2 mb-1">Kelola Pengguna</h1>
+            <p class="text-muted mb-0">Tambah atau perbarui akun <span class="fw-semibold">petugas penagih atau pimpinan</span>.</p>
         </div>
         <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
             <a href="{{ route('dashboard.admin') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
@@ -39,7 +39,7 @@
             <div class="card ptpn-card border-0 shadow-sm">
                 <div class="card-header ptpn-card-header d-flex align-items-center gap-2 px-4 py-3">
                     <i class="fa-solid fa-user-plus text-success"></i>
-                    <span class="fw-bold">Tambah Petugas</span>
+                    <span class="fw-bold">Tambah Pengguna</span>
                 </div>
                 <div class="card-body p-4">
                     <form method="post" action="{{ route('admin.users.store') }}" class="vstack gap-3">
@@ -51,6 +51,13 @@
                         <div>
                             <label class="form-label small fw-bold text-muted mb-1 text-uppercase" style="letter-spacing: 0.5px;">Alamat Email</label>
                             <input type="email" name="email" class="form-control" value="{{ old('email') }}" required placeholder="nama@ptpn.ac.id">
+                        </div>
+                        <div>
+                            <label class="form-label small fw-bold text-muted mb-1 text-uppercase" style="letter-spacing: 0.5px;">Role</label>
+                            <select name="role" class="form-control" required>
+                                <option value="petugas" {{ old('role') === 'petugas' ? 'selected' : '' }}>Petugas Penagih</option>
+                                <option value="regional" {{ old('role') === 'regional' ? 'selected' : '' }}>Pimpinan</option>
+                            </select>
                         </div>
                         <div>
                             <label class="form-label small fw-bold text-muted mb-1 text-uppercase" style="letter-spacing: 0.5px;">Password</label>
@@ -73,7 +80,7 @@
                 <div class="card-header ptpn-card-header d-flex flex-wrap justify-content-between align-items-center gap-2 px-4 py-3">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fa-solid fa-users text-success"></i>
-                        <span class="fw-bold">Daftar Petugas</span>
+                        <span class="fw-bold">Daftar Pengguna</span>
                     </div>
                     <form method="get" action="{{ route('admin.users.index') }}" class="d-flex gap-2">
                         <div class="input-group input-group-sm">
@@ -86,11 +93,12 @@
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover mb-0 align-middle">
-                        <thead class="bg-light">
+                        <thead style="background: linear-gradient(90deg, #CBE1D4 0%, #D7E8DC 50%, #E0DFCC 100%); color: #14532d;">
                             <tr>
-                                <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Nama</th>
-                                <th class="py-3 text-uppercase small fw-bold text-muted">Email</th>
-                                <th class="text-end pe-4 py-3 text-uppercase small fw-bold text-muted">Aksi</th>
+                                <th class="ps-4 py-3 text-uppercase small fw-bold">Nama</th>
+                                <th class="py-3 text-uppercase small fw-bold">Email</th>
+                                <th class="py-3 text-uppercase small fw-bold">Role</th>
+                                <th class="text-end pe-4 py-3 text-uppercase small fw-bold">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -106,6 +114,11 @@
                                     </td>
                                     <td>
                                         <code class="bg-success bg-opacity-10 text-success px-2 py-1 rounded small">{{ $u->email }}</code>
+                                    </td>
+                                    <td>
+                                        <div style="background-color: #0d4f2d !important; color: #ffffff !important; font-weight: 700 !important; padding: 0.5rem 1rem !important; border-radius: 50rem !important; display: inline-block !important; line-height: 1 !important; font-size: 0.75rem !important; text-align: center !important; white-space: nowrap !important;">
+                                            {{ $u->role === 'regional' ? 'Pimpinan' : 'Petugas Penagih' }}
+                                        </div>
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="btn-group shadow-sm rounded-pill overflow-hidden border">
