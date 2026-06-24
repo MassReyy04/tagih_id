@@ -275,8 +275,14 @@ class KolektibilitasService
             ];
             $saldoBermasalah = $manualInput['bermasalah'];
         } else {
-            $saldos = $this->aggregateSaldos($tanggal);
-            $saldoBermasalah = $this->getSaldoBermasalah($tanggal);
+            // Jika tidak ada input manual, tampilkan 0 (bukan otomatis dari monitoring)
+            $saldos = [
+                'lancar' => 0.0,
+                'kurang_lancar' => 0.0,
+                'diragukan' => 0.0,
+                'macet' => 0.0,
+            ];
+            $saldoBermasalah = 0.0;
         }
 
         $rows = [];

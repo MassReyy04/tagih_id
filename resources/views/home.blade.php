@@ -47,7 +47,7 @@
                 <div class="col-lg-8">
                     <div class="card ptpn-card h-100 ptpn-kolek-panel ptpn-kolek-table-card">
                         <div class="table-responsive">
-                            <table class="table table-sm mb-0 align-middle ptpn-kolek-side__table">
+                            <table class="table table-sm mb-0 align-middle ptpn-kolek-side__table w-100">
                                 <thead style="background: linear-gradient(90deg, #CBE1D4 0%, #D7E8DC 50%, #E0DFCC 100%); color: #14532d;">
                                     <tr>
                                         <th>Kualitas Pinjaman</th>
@@ -80,7 +80,7 @@
                                         <td class="ptpn-kolek-side__empty-cell" style="background: #14532d !important; color: white !important;"></td>
                                         <td class="text-end font-monospace" style="background: #14532d !important; color: white !important;">{{ number_format($kolektibilitasSummary['jumlah_perkalian'], 0, ',', '.') }}</td>
                                     </tr>
-                                    <tr class="ptpn-kolek-row ptpn-kolek-row--bermasalah" style="background-color: rgba(220, 53, 69, 0.12);">
+                                    <tr class="ptpn-kolek-row ptpn-kolek-row--bermasalah">
                                         <td style="color: #b91c1c !important; font-weight: 800;">Bermasalah</td>
                                         <td class="ptpn-kolek-side__empty-cell"></td>
                                         <td class="text-end font-monospace" style="color: #b91c1c !important; font-weight: 800;">{{ number_format($kolektibilitasSummary['saldo_bermasalah'], 0, ',', '.') }}</td>
