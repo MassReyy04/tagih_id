@@ -17,10 +17,21 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             @if (!auth()->user()->isRegional())
-                <a href="{{ route('monitoring.pdf', $m) }}" class="btn btn-warning text-dark fw-semibold" target="_blank" rel="noopener">PDF berita acara</a>
-                <a href="{{ route('monitoring.edit', $m) }}" class="btn btn-outline-primary">Edit</a>
+                <a href="{{ route('monitoring.pdf', $m) }}" class="btn btn-warning text-dark fw-bold px-3 shadow-sm" target="_blank" rel="noopener">
+                    <i class="fa-solid fa-file-pdf me-2"></i>PDF berita acara
+                </a>
+                @if ($m->latitude && $m->longitude)
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ $m->latitude }},{{ $m->longitude }}" class="btn btn-primary fw-bold px-3 shadow-sm" target="_blank" rel="noopener">
+                        <i class="fa-solid fa-map-location-dot me-2"></i>Rute
+                    </a>
+                @endif
+                <a href="{{ route('monitoring.edit', $m) }}" class="btn btn-outline-success fw-bold px-3 shadow-sm">
+                    <i class="fa-solid fa-pen-to-square me-2"></i>Edit
+                </a>
             @endif
-            <a href="{{ route('monitoring.index') }}" class="btn btn-outline-secondary">Kembali</a>
+            <a href="{{ route('monitoring.index') }}" class="btn btn-outline-secondary fw-bold px-3 shadow-sm">
+                <i class="fa-solid fa-arrow-left me-2"></i>Kembali
+            </a>
         </div>
     </div>
 
