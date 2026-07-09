@@ -108,7 +108,8 @@ class KolektibilitasService
     public function getSaldoBermasalah(CarbonInterface $tanggal): float
     {
         $row = KolektibilitasBermasalah::query()
-            ->whereDate('tanggal', $tanggal->toDateString())
+            ->whereDate('tanggal', '<=', $tanggal->toDateString())
+            ->orderByDesc('tanggal')
             ->first();
 
         return (float) ($row?->saldo_bermasalah ?? 0);
@@ -128,7 +129,8 @@ class KolektibilitasService
     public function getSaldoInput(CarbonInterface $tanggal): ?array
     {
         $row = KolektibilitasSaldoInput::query()
-            ->whereDate('tanggal', $tanggal->toDateString())
+            ->whereDate('tanggal', '<=', $tanggal->toDateString())
+            ->orderByDesc('tanggal')
             ->first();
 
         if ($row === null) {
