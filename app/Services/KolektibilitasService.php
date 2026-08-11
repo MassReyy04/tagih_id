@@ -385,6 +385,9 @@ class KolektibilitasService
         $monthlyKeys = [];
         $dailyByMonth = [];
 
+        // Variabel carry forward: simpan nilai input manual TERAKHIR untuk bulan tanpa input
+        $lastKnownNilai = null;
+
         for ($month = 1; $month <= $endMonth; $month++) {
             $dt = Carbon::create($year, $month, 1)->startOfMonth();
             $key = $dt->format('Y-m');
@@ -399,10 +402,11 @@ class KolektibilitasService
             $monthSnapshots = $snapshotsByMonth->get($key, collect());
 
             $lastInput = $monthInputs->last();
-            $lastSnapshot = $monthSnapshots->last();
-            $monthlyValues[] = $lastInput
-                ? $this->calculateNilaiFromSaldoInput($lastInput)
-                : ($lastSnapshot ? $this->calculateNilaiFromSnapshot($lastSnapshot) : null);
+            // HANYA GUNAKAN INPUT MANUAL UNTUK NILAI BULANAN (JANGAN pakai snapshot otomatis)
+            if ($lastInput !== null) {
+                $lastKnownNilai = $this->calculateNilaiFromSaldoInput($lastInput);
+            }
+            $monthlyValues[] = $lastKnownNilai;
 
             $dailyLabels = [];
             $dailyValues = [];
