@@ -91,18 +91,18 @@
                                 <div class="small text-muted">{{ $row->nama_usaha }}</div>
                             </td>
                             <td>
-                                <div class="text-dark fw-medium">{{ $row->tanggal->translatedFormat('d F Y') }}</div>
-                            </td>
-                            <td>
-                                <div class="text-dark fw-medium">{{ $row->created_at->translatedFormat('H:i') }}</div>
-                            </td>
-                            <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="rounded-circle bg-light text-success d-flex align-items-center justify-content-center fw-bold border shadow-sm" style="width: 30px; height: 30px; font-size: 0.8rem;">
                                         {{ substr($row->user?->name ?? '?', 0, 1) }}
                                     </div>
                                     <span class="text-muted small">{{ $row->user?->name ?? '—' }}</span>
                                 </div>
+                            </td>
+                            <td>
+                                <div class="text-dark fw-medium">{{ $row->tanggal->translatedFormat('d F Y') }}</div>
+                            </td>
+                            <td>
+                                <div class="text-dark fw-medium">{{ $row->created_at->translatedFormat('H:i') }}</div>
                             </td>
                             <td class="text-end pe-4 text-nowrap">
                                 <div class="btn-group shadow-sm rounded-pill overflow-hidden border">
