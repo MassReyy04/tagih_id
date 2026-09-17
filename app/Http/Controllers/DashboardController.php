@@ -6,6 +6,7 @@ use App\Models\MonitoringPenagihan;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -190,5 +191,106 @@ class DashboardController extends Controller
         }
 
         return ['labels' => $labels, 'values' => $values];
+    }
+
+    public function mitraUnik(Request $request): JsonResponse
+    {
+        [$dateFrom, $dateTo, $userId] = $this->resolveFilters($request);
+
+        $scoped = fn ($q) => $q->when($userId, fn ($qq) => $qq->where('user_id', $userId));
+
+        $baseQuery = MonitoringPenagihan::query()
+            ->tap($scoped)
+            ->whereBetween('tanggal', [$dateFrom->toDateString(), $dateTo->toDateString()]);
+
+        $hasNomorInduk = (clone $baseQuery)
+            ->whereNotNull('nomor_induk')
+            ->where('nomor_induk', '!=', '')
+            ->exists();
+
+        if ($hasNomorInduk) {
+            $groupBy = 'nomor_induk';
+            $rows = (clone $baseQuery)
+                ->whereNotNull('nomor_induk')
+                ->where('nomor_induk', '!=', '')
+                ->select([
+                    'nomor_induk',
+                    DB::raw('MAX(nama_mitra) as nama_mitra'),
+                    DB::raw('MAX(nama_usaha) as nama_usaha'),
+                    DB::raw('MAX(geo_kecamatan) as geo_kecamatan'),
+                    DB::raw('MAX(geo_kelurahan) as geo_kelurahan'),
+                    DB::raw('COUNT(id) as total_kunjungan'),
+                    DB::raw('MAX(tanggal) as terakhir_kunjungan'),
+                ])
+                ->groupBy('nomor_induk')
+                ->orderBy('nama_mitra');
+        } else {
+            $groupBy = 'nama_mitra';
+            $rows = (clone $baseQuery)
+                ->select([
+                    DB::raw('NULL as nomor_induk'),
+                    DB::raw('nama_mitra as nama_mitra'),
+                    DB::raw('MAX(nama_usaha) as nama_usaha'),
+                    DB::raw('MAX(geo_kecamatan) as geo_kecamatan'),
+                    DB::raw('MAX(geo_kelurahan) as geo_kelurahan'),
+                    DB::raw('COUNT(id) as total_kunjungan'),
+                    DB::raw('MAX(tanggal) as terakhir_kunjungan'),
+                ])
+                ->groupBy('nama_mitra')
+                ->orderBy('nama_mitra');
+        }
+
+        if ($request->filled('q')) {
+            $q = '%' . $request->string('q') . '%';
+            $rows->where(function ($w) use ($q) {
+                $w->where('nama_mitra', 'like', $q)
+                    ->orWhere('nama_usaha', 'like', $q)
+                    ->orWhere('nomor_induk', 'like', $q)
+                    ->orWhere('geo_kecamatan', 'like', $q)
+                    ->orWhere('geo_kelurahan', 'like', $q);
+            });
+        }
+
+        $list = $rows->get()->map(function ($m) {
+            return [
+                'nomor_induk' => $m->nomor_induk ?? '-',
+                'nama_mitra' => $m->nama_mitra,
+                'nama_usaha' => $m->nama_usaha ?? '-',
+                'kecamatan' => $m->geo_kecamatan ?: '-',
+                'kelurahan' => $m->geo_kelurahan ?: '-',
+                'total_kunjungan' => (int) $m->total_kunjungan,
+                'terakhir_kunjungan' => $m->terakhir_kunjungan
+                    ? Carbon::parse($m->terakhir_kunjungan)->translatedFormat('d M Y')
+                    : '-',
+            ];
+        })->values();
+
+        $html = '';
+        if ($list->isEmpty()) {
+            $html = '<tr><td colspan="6" class="text-center text-muted py-5"><i class="fa-solid fa-folder-open fa-2x mb-2 opacity-25"></i><p class="mb-0">Tidak ada data mitra untuk periode &amp; filter ini.</p></td></tr>';
+        } else {
+            foreach ($list as $i => $m) {
+                $html .= '<tr>'
+                    . '<td class="ps-4 text-muted small">' . ($i + 1) . '.</td>'
+                    . '<td class="fw-medium">' . e($m['nama_mitra']) . '</td>'
+                    . '<td><code class="text-success small">' . e($m['nomor_induk']) . '</code></td>'
+                    . '<td class="small">' . e($m['nama_usaha']) . '</td>'
+                    . '<td class="small">'
+                        . ($m['kelurahan'] !== '-' ? '<span class="text-muted d-block small">' . e($m['kelurahan']) . '</span>' : '')
+                        . e($m['kecamatan'])
+                    . '</td>'
+                    . '<td class="text-end pe-4 text-nowrap small">'
+                        . '<span class="d-block">x' . $m['total_kunjungan'] . '</span>'
+                        . '<span class="text-muted d-block fw-normal">terakhir: ' . e($m['terakhir_kunjungan']) . '</span>'
+                    . '</td>'
+                    . '</tr>';
+            }
+        }
+
+        return response()->json([
+            'total' => $list->count(),
+            'periode' => $dateFrom->translatedFormat('d M Y') . ' — ' . $dateTo->translatedFormat('d M Y'),
+            'html' => $html,
+        ]);
     }
 }

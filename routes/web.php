@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard-admin', [DashboardController::class, 'index'])->name('dashboard.admin');
+        Route::get('/dashboard-admin/mitra-unik', [DashboardController::class, 'mitraUnik'])->name('dashboard.admin.mitra-unik');
         Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
         Route::post('/admin/users', [UserManagementController::class, 'store'])->name('admin.users.store');
         Route::get('/admin/users/{user}/edit', [UserManagementController::class, 'edit'])->name('admin.users.edit');

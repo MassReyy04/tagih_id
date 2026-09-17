@@ -56,10 +56,22 @@
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card ptpn-card h-100 border-start border-4 border-primary">
+            <div class="card ptpn-card h-100 border-start border-4 border-primary cursor-pointer transition-hover"
+                 data-bs-toggle="modal" data-bs-target="#modalMitraUnik" role="button"
+                 data-date-from="{{ $dateFrom->toDateString() }}"
+                 data-date-to="{{ $dateTo->toDateString() }}"
+                 data-user-id="{{ $userId ?? '' }}"
+                 style="transition: transform .18s ease, box-shadow .18s ease;"
+                 onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 25px -8px rgba(13,79,45,.25)';"
+                 onmouseout="this.style.transform='';this.style.boxShadow='';">
                 <div class="card-body">
-                    <div class="text-muted small fw-semibold">Total mitra binaan <span class="text-muted">(unik)</span></div>
-                    <div class="h3 mb-0 fw-bold text-primary">{{ number_format($totalMitra) }}</div>
+                    <div class="text-muted small fw-semibold">Total mitra binaan <span class="text-muted">(unik)</span>
+                        <i class="fa-solid fa-circle-info ms-1 text-primary opacity-75" title="Klik untuk melihat daftar mitra lengkap beserta kecamatan"></i>
+                    </div>
+                    <div class="h3 mb-0 fw-bold text-primary d-flex align-items-center gap-2">
+                        {{ number_format($totalMitra) }}
+                        <i class="fa-solid fa-arrow-up-right-from-square text-primary opacity-75" style="font-size:1rem;"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -208,6 +220,74 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Daftar Mitra Binaan Unik -->
+<div class="modal fade" id="modalMitraUnik" tabindex="-1" aria-labelledby="modalMitraUnikLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 1rem;">
+            <div class="modal-header" style="background: linear-gradient(90deg, #CBE1D4 0%, #D7E8DC 50%, #E0DFCC 100%); border-radius: 1rem 1rem 0 0;">
+                <div>
+                    <h5 class="modal-title fw-bold mb-0" id="modalMitraUnikLabel">
+                        <i class="fa-solid fa-users text-success me-2"></i>Daftar Mitra Binaan Unik
+                    </h5>
+                    <div class="small text-muted mt-1" id="modalMitraUnikPeriode">-</div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                        <i class="fa-solid fa-user-check me-1"></i>
+                        Total: <span id="modalMitraUnikTotal" class="fw-bold">0</span> mitra
+                    </span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div class="px-4 py-3 border-bottom bg-light bg-opacity-50">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    <i class="fa-solid fa-magnifying-glass small"></i>
+                                </span>
+                                <input type="search" id="modalMitraUnikSearch"
+                                       class="form-control border-start-0 ps-0"
+                                       placeholder="Cari nama mitra, NIM, usaha, kecamatan, kelurahan…">
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end small text-muted">
+                            <i class="fa-solid fa-circle-info me-1"></i>
+                            Data sesuai filter tanggal &amp; petugas pada halaman rekap
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive" id="modalMitraUnikTableWrap" style="max-height: 55vh;">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead style="background: linear-gradient(90deg, #CBE1D4 0%, #D7E8DC 50%, #E0DFCC 100%); color: #14532d;" class="sticky-top">
+                            <tr>
+                                <th class="ps-4 py-3 text-uppercase small fw-bold" style="width: 3.5rem;">No</th>
+                                <th class="py-3 text-uppercase small fw-bold">Nama Mitra</th>
+                                <th class="py-3 text-uppercase small fw-bold">NIM</th>
+                                <th class="py-3 text-uppercase small fw-bold">Nama Usaha</th>
+                                <th class="py-3 text-uppercase small fw-bold">Kelurahan / Kecamatan</th>
+                                <th class="text-end pe-4 py-3 text-uppercase small fw-bold">Kunjungan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalMitraUnikBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <div class="spinner-border text-success spinner-border-sm me-2" role="status"></div>
+                                    Memuat data mitra…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light bg-opacity-50 rounded-bottom border-top-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -264,6 +344,104 @@
                     x: { ticks: { maxRotation: 45, minRotation: 0 } },
                 },
             },
+        });
+    })();
+
+    // ============================================================
+    // Modal Daftar Mitra Binaan Unik + Live Search via AJAX
+    // ============================================================
+    (function () {
+        const modalEl = document.getElementById('modalMitraUnik');
+        if (!modalEl) return;
+
+        const endpoint = @json(route('dashboard.admin.mitra-unik'));
+        const tbody = document.getElementById('modalMitraUnikBody');
+        const searchInput = document.getElementById('modalMitraUnikSearch');
+        const periodeEl = document.getElementById('modalMitraUnikPeriode');
+        const totalEl = document.getElementById('modalMitraUnikTotal');
+
+        let currentFilters = { date_from: '', date_to: '', user_id: '' };
+        let searchTimer = null;
+        let currentAbort = null;
+
+        function setLoadingState() {
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5">'
+                + '<div class="spinner-border text-success spinner-border-sm me-2" role="status"></div>'
+                + 'Memuat data mitra…</td></tr>';
+        }
+
+        async function loadMitraUnik(search = '') {
+            if (!tbody || !totalEl || !periodeEl) return;
+
+            if (currentAbort) currentAbort.abort();
+            const ctrl = new AbortController();
+            currentAbort = ctrl;
+
+            const params = new URLSearchParams();
+            if (currentFilters.date_from) params.set('date_from', currentFilters.date_from);
+            if (currentFilters.date_to) params.set('date_to', currentFilters.date_to);
+            if (currentFilters.user_id) params.set('user_id', currentFilters.user_id);
+            if (search.trim()) params.set('q', search.trim());
+
+            try {
+                setLoadingState();
+                const res = await fetch(endpoint + '?' + params.toString(), {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    signal: ctrl.signal,
+                    credentials: 'same-origin',
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                if (!ctrl.signal.aborted) {
+                    periodeEl.textContent = 'Periode: ' + (json.periode || '-');
+                    totalEl.textContent = json.total ?? 0;
+                    tbody.innerHTML = json.html || '';
+                }
+            } catch (e) {
+                if (e && e.name === 'AbortError') return;
+                if (!ctrl.signal.aborted) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-5">'
+                        + '<i class="fa-solid fa-triangle-exclamation me-2"></i>'
+                        + 'Gagal memuat data: ' + (e && e.message ? e.message : 'terjadi kesalahan')
+                        + '</td></tr>';
+                }
+            }
+        }
+
+        // Buka modal: ambil filter dari card yang diklik
+        modalEl.addEventListener('show.bs.modal', function (evt) {
+            const opener = evt && evt.relatedTarget ? evt.relatedTarget : null;
+            if (opener && opener.getAttribute) {
+                currentFilters = {
+                    date_from: opener.getAttribute('data-date-from') || currentFilters.date_from,
+                    date_to: opener.getAttribute('data-date-to') || currentFilters.date_to,
+                    user_id: opener.getAttribute('data-user-id') || currentFilters.user_id,
+                };
+            }
+            if (searchInput) searchInput.value = '';
+            loadMitraUnik('');
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            if (currentAbort) { currentAbort.abort(); currentAbort = null; }
+        });
+
+        // Live search dengan debounce 350ms
+        searchInput && searchInput.addEventListener('input', function () {
+            const val = this.value;
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => loadMitraUnik(val), 350);
+        });
+
+        // Enter langsung cari tanpa debounce
+        searchInput && searchInput.addEventListener('keydown', function (e) {
+            if (e && e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimer);
+                loadMitraUnik(this.value);
+            }
         });
     })();
 </script>
